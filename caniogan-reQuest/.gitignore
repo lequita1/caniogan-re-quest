@@ -1,5 +1,16 @@
+# Dependencies and build output
+node_modules/
+dist/
+dist-ssr/
+
+# Local environment values; keep the shareable setup template
+.env
+.env.*
+!.env.example
+*.local
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,10 +18,48 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Caches, test reports and temporary files
+.cache/
+.vite/
+.firebase/
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+tmp/
+temp/
+*.tmp
+*.bak
+*.tsbuildinfo
+.runtimeconfig.json
+
+# Local AI instructions, sessions and project-memory tooling
+AGENTS.md
+CONTEXT.md
+CLAUDE.md
+GEMINI.md
+.project-memory.json
+.codex/
+.agents/
+.claude/
+.cursor/
+.continue/
+.cursorrules
+.cursorignore
+.aider*
+.github/copilot-instructions.md
+graphify-out/
+
+# Local documentation and generated planning artifacts
+docs/
+outputs/
+
+# Private server credentials (not Firebase public web configuration)
+*service-account*.json
+*-firebase-adminsdk-*.json
+*.key
+*.p12
+*.pfx
 
 # Editor directories and files
 .vscode/*
