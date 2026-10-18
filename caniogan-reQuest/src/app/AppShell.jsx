@@ -1,9 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import seal from "../assets/brand/caniogan-seal.png";
+import { useAuth } from "../features/auth/authContext";
+import { SignOutButton } from "../features/auth/AuthPages";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
 const residentLinks = [
-  ["Tahanan", "/resident"],
+  ["Home", "/resident"],
   ["Mga kahilingan", "/resident/requests"],
   ["Komunidad", "/resident/community"],
   ["Dokumento", "/resident/documents"],
@@ -11,13 +15,15 @@ const residentLinks = [
   ["Mensahe", "/resident/messages"],
 ];
 const staffLinks = [
-  ["Mga queue", "/staff"],
+  ["Mga susuriin", "/staff"],
   ["Dokumento", "/staff/documents"],
   ["Puntos", "/staff/points"],
 ];
 const captainLinks = [["Pangkalahatang ulat", "/captain"]];
 
 export function AppShell({ audience }) {
+  const { t } = useTranslation();
+  const { account } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButton = useRef(null);
   const location = useLocation();
@@ -41,15 +47,14 @@ export function AppShell({ audience }) {
   return (
     <div className="app-shell" data-audience={audience} onKeyDown={onEscape}>
       <a className="skip-link" href="#main-content">
-        Lumaktaw sa nilalaman
+        {t("Lumaktaw sa nilalaman")}{" "}
       </a>
-      <div className="preview-banner">PROTOTYPE · Sample na datos</div>
       <header className="site-header">
         <div className="header-row">
           <Link
             to={home}
             className="brand"
-            aria-label="Caniogan Re:Quest — Tahanan"
+            aria-label={t("Caniogan Re:Quest — Home")}
             onClick={closeMenu}
           >
             <img
@@ -60,54 +65,59 @@ export function AppShell({ audience }) {
               className="brand__seal"
             />
             <span className="brand__identity">
-              <span className="brand__name">Caniogan Re:Quest</span>
-              <span className="brand__place">Malolos, Bulacan</span>
+              <span className="brand__name">{t("Caniogan Re:Quest")}</span>
+              <span className="brand__place">{t("Malolos, Bulacan")}</span>
             </span>
           </Link>
-          <nav className="utility-nav" aria-label="Account at tulong">
-            {isResident ? (
-              <Link className="utility-link" to="/resident/account">
-                Alex · Account
+          <div className="header-tools">
+            <LanguageSwitcher />
+            <nav className="utility-nav" aria-label={t("Account at tulong")}>
+              {isResident ? (
+                <Link className="utility-link" to="/resident/account">
+                  {account?.profile?.displayName}
+                  {t("· Account")}{" "}
+                </Link>
+              ) : (
+                <span className="role-label">
+                  {t("Tungkulin:")}{" "}
+                  {audience === "staff" ? t("Kawani") : t("Captain")}
+                </span>
+              )}
+              <Link className="utility-link" to={help}>
+                {t("Gabay")}{" "}
               </Link>
-            ) : (
-              <span className="role-label">
-                Tungkulin: {audience === "staff" ? "Kawani" : "Captain"}
-              </span>
-            )}
-            <Link className="utility-link" to={help}>
-              Gabay
-            </Link>
-            {isResident && (
-              <Link className="utility-link" to="/resident/notifications">
-                Mga abiso
-              </Link>
-            )}
-          </nav>
+              {isResident && (
+                <Link className="utility-link" to="/resident/notifications">
+                  {t("Mga abiso")}{" "}
+                </Link>
+              )}
+            </nav>
+          </div>
         </div>
-        <nav className="desktop-nav" aria-label="Pangunahing nabigasyon">
+        <nav className="desktop-nav" aria-label={t("Pangunahing nabigasyon")}>
           {links.map(([label, to]) => (
             <NavLink key={to} to={to} end={to === home} className="nav-link">
-              {label}
+              {t(label)}
             </NavLink>
           ))}
         </nav>
         <nav
           className="mobile-nav"
-          aria-label="Pangunahing nabigasyon sa maliit na screen"
+          aria-label={t("Pangunahing nabigasyon sa maliit na screen")}
         >
           <NavLink to={home} end className="nav-link" onClick={closeMenu}>
             {isResident
-              ? "Tahanan"
+              ? t("Home")
               : audience === "staff"
-                ? "Mga queue"
-                : "Mga ulat"}
+                ? t("Mga susuriin")
+                : t("Mga ulat")}
           </NavLink>
           <NavLink
             to={isResident ? "/resident/requests" : help}
             className="nav-link"
             onClick={closeMenu}
           >
-            {isResident ? "Mga hiling" : "Gabay"}
+            {isResident ? t("Mga kahilingan") : t("Gabay")}
           </NavLink>
           <button
             type="button"
@@ -117,32 +127,32 @@ export function AppShell({ audience }) {
             aria-controls="mobile-menu"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? "Isara" : "Menu"}
+            {menuOpen ? t("Isara") : t("Menu")}
           </button>
         </nav>
         {menuOpen && (
           <nav
             id="mobile-menu"
             className="mobile-menu"
-            aria-label="Lahat ng pahina"
+            aria-label={t("Lahat ng pahina")}
           >
             {links.map(([label, to]) => (
               <NavLink to={to} end={to === home} key={to} onClick={closeMenu}>
-                {label}
+                {t(label)}
               </NavLink>
             ))}
             {isResident && (
               <>
                 <NavLink to="/resident/notifications" onClick={closeMenu}>
-                  Mga abiso
+                  {t("Mga abiso")}{" "}
                 </NavLink>
                 <NavLink to="/resident/account" onClick={closeMenu}>
-                  Account at privacy
+                  {t("Account at privacy")}{" "}
                 </NavLink>
               </>
             )}
             <NavLink to={help} onClick={closeMenu}>
-              Gabay at tulong
+              {t("Gabay at tulong")}{" "}
             </NavLink>
           </nav>
         )}
@@ -158,25 +168,27 @@ export function AppShell({ audience }) {
       <footer className="site-footer">
         <div className="footer-content">
           <div>
-            <p className="footer-name">Barangay Caniogan · Malolos, Bulacan</p>
+            <p className="footer-name">
+              {t("Barangay Caniogan · Malolos, Bulacan")}
+            </p>
             <p className="small muted">
-              Address, oras at opisyal na requirements: [placeholder]
+              {t(
+                "Para sa oras ng opisina at mga kinakailangan, makipag-ugnayan sa tanggapan ng barangay.",
+              )}{" "}
             </p>
           </div>
-          <Link to={help}>Gabay at tulong</Link>
+          <Link to={help}>{t("Gabay at tulong")}</Link>
         </div>
-        <nav className="preview-links" aria-label="Mga halimbawa ng layout">
-          <span>Mga layout na puwedeng tingnan:</span>
-          <NavLink to="/resident">Residente</NavLink>
-          <NavLink to="/staff">Kawani</NavLink>
-          <NavLink to="/captain">Captain</NavLink>
-        </nav>
+        <div className="preview-links">
+          <SignOutButton />
+        </div>
       </footer>
     </div>
   );
 }
 
 export function RouteFocus() {
+  const { i18n } = useTranslation();
   const { pathname } = useLocation();
   const previousPath = useRef(pathname);
   useEffect(() => {
@@ -189,6 +201,6 @@ export function RouteFocus() {
       heading?.focus({ preventScroll: true });
       previousPath.current = pathname;
     }
-  }, [pathname]);
+  }, [pathname, i18n.resolvedLanguage]);
   return null;
 }

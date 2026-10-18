@@ -3,18 +3,18 @@ export const requests = [
   {
     id: "cleanup",
     title: "Paglilinis ng bakuran",
-    status: "May 2 aplikante",
-    next: "Pumili ng makatutulong",
+    status: "2 boluntaryo ang nag-apply",
+    next: "Pumili ng boluntaryo",
     kind: "Tulong sa komunidad",
-    reference: "RQ-DEMO-024",
+    reference: "RQ-2026-024",
   },
   {
     id: "hauling",
     title: "Tulong sa paghahakot",
     status: "Sinusuri ng kawani",
-    next: "Maghintay ng update",
+    next: "Hintayin ang resulta ng pagsusuri",
     kind: "Tulong sa komunidad",
-    reference: "RQ-DEMO-025",
+    reference: "RQ-2026-025",
   },
   {
     id: "residency",
@@ -22,7 +22,7 @@ export const requests = [
     status: "May kailangang baguhin",
     next: "Basahin ang paliwanag",
     kind: "Dokumento",
-    reference: "DOC-DEMO-018",
+    reference: "DOC-2026-018",
   },
   {
     id: "clearance",
@@ -30,7 +30,7 @@ export const requests = [
     status: "Maaari nang kunin",
     next: "Ihanda ang orihinal na ID",
     kind: "Dokumento",
-    reference: "DOC-DEMO-019",
+    reference: "DOC-2026-019",
   },
 ];
 export const documents = [
@@ -46,32 +46,32 @@ export const documents = [
 export const queues = [
   {
     id: "verification",
-    title: "Residency verification",
-    description: "3 naghihintay · sample",
-    detail: "Mga aplikasyon para sa pagpapatunay ng residency.",
+    title: "Pagpapatunay ng paninirahan",
+    description: "3 naghihintay",
+    detail: "Mga aplikasyon para sa pagpapatunay ng paninirahan.",
   },
   {
     id: "moderation",
-    title: "Community moderation",
-    description: "2 bagong kahilingan · sample",
-    detail: "Mga kahilingang susuriin bago ilathala sa community board.",
+    title: "Pagsusuri ng mga kahilingan",
+    description: "2 bagong kahilingan",
+    detail: "Mga kahilingang susuriin bago ilathala sa komunidad.",
   },
   {
     id: "documents",
     title: "Mga dokumento",
-    description: "4 para sa pagsusuri · sample",
+    description: "4 para sa pagsusuri",
     detail: "Mga aplikasyon at pagproseso ng dokumento.",
   },
   {
     id: "points",
-    title: "Points review",
-    description: "1 may dalawang kumpirmasyon · sample",
-    detail: "Mga gawaing kinumpirma ng boluntaryo at requester.",
+    title: "Pagsusuri ng puntos",
+    description: "1 may dalawang kumpirmasyon",
+    detail: "Mga gawaing kinumpirma ng boluntaryo at humiling.",
   },
   {
     id: "reports",
     title: "Mga iniulat na isyu",
-    description: "1 nakatalagang case · sample",
-    detail: "Mga iniulat na problemang nakatalaga sa reviewer.",
+    description: "1 nakatalagang ulat",
+    detail: "Mga iniulat na problemang nakatalaga sa tagasuri.",
   },
 ];

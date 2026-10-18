@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import {
@@ -12,45 +13,51 @@ import {
   TextField,
 } from "../../components/ui";
 import { documents, requests } from "./sampleData";
+import { useAuth } from "../auth/authContext";
 
 export function ResidentHome() {
+  const { t } = useTranslation();
+  const { account } = useAuth();
   return (
     <div className="page-stack">
       <PageHeading
-        title="Magandang araw, Alex."
-        description="Ano ang kailangan mo ngayon?"
+        title={t("Magandang araw, {{name}}.", {
+          name: account?.profile?.displayName || "ka-barangay",
+        })}
+        description={t("Ano ang kailangan mo ngayon?")}
       />
       <Notice
         tone="warning"
-        title="May kailangan kang kumpirmahin"
+        title={t("May kailangan kang kumpirmahin")}
         action={
           <ActionLink to="/resident/requests/completion">
-            Tingnan ang gawain
+            {"Tingnan ang gawain"}{" "}
           </ActionLink>
         }
       >
         <p>
-          Natapos na ni Sam ang halimbawang gawain. Tingnan muna bago
-          kumpirmahin.
+          {t(
+            "Natapos na ni Sam ang gawain. Suriin ang resulta bago kumpirmahin.",
+          )}{" "}
         </p>
       </Notice>
       <div className="home-grid">
         <section className="service-section" aria-labelledby="services-heading">
-          <h2 id="services-heading">Mga serbisyo</h2>
+          <h2 id="services-heading">{t("Mga serbisyo")}</h2>
           <div className="link-list">
             <RowLink
-              title="Humingi ng tulong"
-              description="Mag-post ng pangangailangan sa komunidad."
+              title={t("Humingi ng tulong")}
+              description={t("Mag-post ng pangangailangan sa komunidad.")}
               to="/resident/requests/new"
             />
             <RowLink
-              title="Mag-apply ng dokumento"
-              description="Tingnan ang requirements bago magsimula."
+              title={t("Mag-apply ng dokumento")}
+              description={t("Tingnan ang requirements bago magsimula.")}
               to="/resident/documents"
             />
             <RowLink
-              title="Sumali sa aktibidad"
-              description="Makilahok o mag-alok ng tulong."
+              title={t("Sumali sa aktibidad")}
+              description={t("Makilahok o mag-alok ng tulong.")}
               to="/resident/events"
             />
           </div>
@@ -59,32 +66,32 @@ export function ResidentHome() {
           className="surface-panel recent-work"
           aria-labelledby="recent-heading"
         >
-          <h2 id="recent-heading">Mga kahilingan mo</h2>
+          <h2 id="recent-heading">{t("Mga kahilingan mo")}</h2>
           <div className="recent-item">
             <dl>
-              <Definition label="Paglilinis ng bakuran">
-                May 2 aplikante
+              <Definition label={t("Paglilinis ng bakuran")}>
+                {t("2 boluntaryo ang nag-apply")}{" "}
               </Definition>
             </dl>
             <ActionLink to="/resident/requests/cleanup">
-              Tingnan ang mga aplikante
+              {t("Tingnan ang mga aplikante")}{" "}
             </ActionLink>
           </div>
           <div className="recent-item">
             <dl>
-              <Definition label="Certificate of Residency">
-                May kailangang baguhin
+              <Definition label={t("Certificate of Residency")}>
+                {t("May kailangang baguhin")}{" "}
               </Definition>
             </dl>
             <ActionLink to="/resident/requests/residency">
-              Basahin ang paliwanag
+              {t("Basahin ang paliwanag")}{" "}
             </ActionLink>
           </div>
         </section>
       </div>
       <RowLink
-        title="Kailangan mo ng gabay?"
-        description="Puwedeng magpatulong sa barangay desk."
+        title={t("Kailangan mo ng gabay?")}
+        description={t("Puwedeng magpatulong sa barangay desk.")}
         to="/resident/help"
       />
     </div>
@@ -92,6 +99,7 @@ export function ResidentHome() {
 }
 
 export function RequestsPage() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState("all");
   const visible = requests.filter(
     (request) => filter === "all" || request.kind === filter,
@@ -99,22 +107,24 @@ export function RequestsPage() {
   return (
     <div className="page-stack">
       <PageHeading
-        title="Mga kahilingan"
-        description="Tingnan ang kalagayan at susunod mong gagawin."
+        title={t("Mga kahilingan")}
+        description={t("Tingnan ang kalagayan at susunod mong gagawin.")}
       />
       <div className="page-toolbar">
         <SelectField
-          label="Ipakita"
+          label={t("Ipakita")}
           value={filter}
           onChange={(event) => setFilter(event.target.value)}
         >
-          <option value="all">Lahat ng kahilingan</option>
-          <option>Tulong sa komunidad</option>
-          <option>Dokumento</option>
-          <option>Natapos na</option>
+          <option value="all">{t("Lahat ng kahilingan")}</option>
+          <option value="Tulong sa komunidad">
+            {t("Tulong sa komunidad")}
+          </option>
+          <option value="Dokumento">{t("Dokumento")}</option>
+          <option value="Natapos na">{t("Natapos na")}</option>
         </SelectField>
         <ActionLink variant="primary" to="/resident/requests/new">
-          Bagong kahilingan
+          {t("Bagong kahilingan")}{" "}
         </ActionLink>
       </div>
       {visible.length ? (
@@ -122,23 +132,25 @@ export function RequestsPage() {
           {visible.map((request) => (
             <RowLink
               key={request.id}
-              title={request.title}
-              description={`${request.status} · ${request.next}`}
+              title={t(request.title)}
+              description={`${t(request.status)} · ${t(request.next)}`}
               to={`/resident/requests/${request.id}`}
             />
           ))}
         </div>
       ) : (
         <EmptyState
-          title="Wala pang natapos na kahilingan"
+          title={t("Wala pang natapos na kahilingan")}
           action={
             <Button variant="secondary" onClick={() => setFilter("all")}>
-              Tingnan ang lahat
+              {t("Tingnan ang lahat")}
             </Button>
           }
         >
           <p>
-            Dito lalabas ang mga kahilingan kapag nakumpleto na ang proseso.
+            {t(
+              "Dito lalabas ang mga kahilingan kapag nakumpleto na ang proseso.",
+            )}{" "}
           </p>
         </EmptyState>
       )}
@@ -147,13 +159,14 @@ export function RequestsPage() {
 }
 
 export function RequestDetail() {
+  const { t } = useTranslation();
   const { requestId } = useParams();
   const request =
     requestId === "completion"
       ? {
           id: "completion",
           title: "Paglilinis ng bakuran",
-          reference: "ASG-DEMO-004",
+          reference: "ASG-2026-004",
           status: "Tapos na ayon sa boluntaryo",
           next: "Kailangan ang kumpirmasyon ng requester",
         }
@@ -162,49 +175,55 @@ export function RequestDetail() {
     return (
       <div className="task-column page-stack">
         <PageHeading
-          title="Hindi makita ang kahilingan"
+          title={t("Hindi makita ang kahilingan")}
           backTo="/resident/requests"
-          backLabel="Bumalik sa mga kahilingan"
+          backLabel={t("Bumalik sa mga kahilingan")}
         />
-        <EmptyState title="Suriin ang link">
-          <p>Piliin muli ang kahilingan mula sa listahan.</p>
+        <EmptyState title={t("Suriin ang link")}>
+          <p>{t("Piliin muli ang kahilingan mula sa listahan.")}</p>
         </EmptyState>
       </div>
     );
   return (
     <div className="task-column page-stack">
       <PageHeading
-        title={request.title}
+        title={t(request.title)}
         backTo="/resident/requests"
-        backLabel="Bumalik sa mga kahilingan"
+        backLabel={t("Bumalik sa mga kahilingan")}
       />
       <dl className="definition-list">
-        <Definition label="Reference">{request.reference}</Definition>
-        <Definition label="Kalagayan">{request.status}</Definition>
+        <Definition label={t("Reference")}>{request.reference}</Definition>
+        <Definition label={t("Kalagayan")}>{t(request.status)}</Definition>
       </dl>
       {request.id === "residency" ? (
-        <Notice title="Paliwanag ng kawani" tone="warning">
-          <p>“Pakilinaw kung para sa anong paaralan ang enrollment.”</p>
+        <Notice title={t("Paliwanag ng kawani")} tone="warning">
+          <p>{t("“Pakilinaw kung para sa anong paaralan ang enrollment.”")}</p>
         </Notice>
       ) : (
-        <Notice title={request.next}>
+        <Notice title={t(request.next)}>
           <p>
             {request.id === "clearance"
-              ? "Personal ang pagkuha. Dalhin ang orihinal na ID at ang application reference."
-              : "Halimbawang tala ito para makita ang kalagayan at susunod na hakbang."}
+              ? t(
+                  "Personal ang pagkuha. Dalhin ang orihinal na ID at ang application reference.",
+                )
+              : t(
+                  "Tingnan ang status ng kahilingan at ang susunod na hakbang.",
+                )}
           </p>
         </Notice>
       )}
       <p className="muted">
-        Sample lamang ang tala. Hindi pa magagamit ang pagpili, pagkumpirma o
-        pagproseso sa halimbawang ito.
+        {t(
+          "Para sa tulong tungkol sa kahilingang ito, makipag-ugnayan sa tanggapan ng barangay.",
+        )}{" "}
       </p>
-      <ActionLink to="/resident/help">Kailangan ko ng tulong</ActionLink>
+      <ActionLink to="/resident/help">{t("Kailangan ko ng tulong")}</ActionLink>
     </div>
   );
 }
 
 export function NewRequestPage() {
+  const { t } = useTranslation();
   const [values, setValues] = useState({
     title: "",
     category: "Paglilinis ng komunidad",
@@ -234,32 +253,35 @@ export function NewRequestPage() {
   }
   return (
     <div className="task-column page-stack">
-      <PageHeading title="Humingi ng tulong" backTo="/resident" />
+      <PageHeading title={t("Humingi ng tulong")} backTo="/resident" />
       <p className="muted">
-        Halimbawa lamang ang form na ito. Walang ipapadalang kahilingan.
+        {t(
+          "Ilarawan ang kailangan mong tulong. Suriin ang mga detalye bago magpatuloy.",
+        )}{" "}
       </p>
       {review ? (
         <section className="page-stack" aria-labelledby="review-heading">
           <h2 id="review-heading" tabIndex="-1" ref={reviewHeading}>
-            Suriin ang mga detalye
+            {t("Suriin ang mga detalye")}{" "}
           </h2>
           <dl className="definition-list">
-            <Definition label="Pamagat">{values.title}</Definition>
-            <Definition label="Kategorya">{values.category}</Definition>
-            <Definition label="Anong tulong ang kailangan?">
+            <Definition label={t("Pamagat")}>{values.title}</Definition>
+            <Definition label={t("Kategorya")}>{t(values.category)}</Definition>
+            <Definition label={t("Anong tulong ang kailangan?")}>
               {values.description}
             </Definition>
           </dl>
-          <Notice title="Hindi pa ito naipapadala">
+          <Notice title={t("Hindi pa ito naipapadala")}>
             <p>
-              Puwede mong balikan at baguhin ang mga sagot. Hindi pa magagamit
-              ang pagsusumite sa halimbawang ito.
+              {t(
+                "Hindi pa available ang online na pagsusumite. Maaari mong baguhin ang mga detalye o humingi ng tulong sa tanggapan ng barangay.",
+              )}{" "}
             </p>
           </Notice>
           <div className="action-stack">
-            <Button disabled>Isumite ang kahilingan</Button>
+            <Button disabled>{t("Isumite ang kahilingan")}</Button>
             <Button variant="secondary" onClick={() => setReview(false)}>
-              Baguhin ang detalye
+              {t("Baguhin ang detalye")}{" "}
             </Button>
           </div>
         </section>
@@ -272,11 +294,11 @@ export function NewRequestPage() {
               ref={errorSummary}
               tabIndex="-1"
             >
-              <h2>May kailangang ayusin</h2>
+              <h2>{t("May kailangang ayusin")}</h2>
               <ul>
                 {Object.entries(errors).map(([key, message]) => (
                   <li key={key}>
-                    <a href={`#request-${key}`}>{message}</a>
+                    <a href={`#request-${key}`}>{t(message)}</a>
                   </li>
                 ))}
               </ul>
@@ -284,41 +306,49 @@ export function NewRequestPage() {
           )}
           <TextField
             id="request-title"
-            label="Pamagat"
+            label={t("Pamagat")}
             name="title"
             value={values.title}
             onChange={change}
-            hint="Maikli at malinaw na pamagat."
+            hint={t("Maikli at malinaw na pamagat.")}
             error={errors.title}
             required
             maxLength={100}
             autoComplete="off"
           />
           <SelectField
-            label="Kategorya"
+            label={t("Kategorya")}
             name="category"
             value={values.category}
             onChange={change}
           >
-            <option>Paglilinis ng komunidad</option>
-            <option>Lost &amp; Found</option>
-            <option>Praktikal na tulong</option>
-            <option>Aktibidad sa komunidad</option>
+            <option value="Paglilinis ng komunidad">
+              {t("Paglilinis ng komunidad")}
+            </option>
+            <option value="Lost & Found">{t("Lost & Found")}</option>
+            <option value="Praktikal na tulong">
+              {t("Praktikal na tulong")}
+            </option>
+            <option value="Aktibidad sa komunidad">
+              {t("Aktibidad sa komunidad")}
+            </option>
           </SelectField>
           <TextField
             id="request-description"
-            label="Anong tulong ang kailangan?"
+            label={t("Anong tulong ang kailangan?")}
             name="description"
             value={values.description}
             onChange={change}
             multiline
             rows={5}
-            hint="Huwag ilagay dito ang numero ng ID o pribadong contact details."
+            hint={t(
+              "Huwag ilagay dito ang numero ng ID o pribadong contact details.",
+            )}
             error={errors.description}
             required
             maxLength={2000}
           />
-          <Button type="submit">Suriin ang mga detalye</Button>
+          <Button type="submit">{t("Suriin ang mga detalye")}</Button>
         </form>
       )}
     </div>
@@ -326,90 +356,107 @@ export function NewRequestPage() {
 }
 
 export function DocumentsPage() {
+  const { t } = useTranslation();
   return (
     <div className="page-stack">
       <PageHeading
-        title="Mga dokumento"
-        description="Aplikasyon para sa sarili mo. Personal ang pagkuha sa barangay."
+        title={t("Mga dokumento")}
+        description={t(
+          "Aplikasyon para sa sarili mo. Personal ang pagkuha sa barangay.",
+        )}
       />
       <div className="link-list">
         {documents.map(([id, title]) => (
           <RowLink
             key={id}
             title={title}
-            description="Requirements: [kailangang kumpirmahin sa barangay]"
+            description={t(
+              "Tingnan ang mga kinakailangan at paraan ng pagkuha",
+            )}
             to={`/resident/documents/${id}`}
           />
         ))}
       </div>
       <Notice
-        title="Kailangan ng tulong sa pagpili?"
-        action={<ActionLink to="/resident/help">Tingnan ang gabay</ActionLink>}
+        title={t("Kailangan ng tulong sa pagpili?")}
+        action={
+          <ActionLink to="/resident/help">{"Tingnan ang gabay"}</ActionLink>
+        }
       >
-        <p>Puwedeng magpatulong sa barangay desk.</p>
+        <p>{t("Puwedeng magpatulong sa barangay desk.")}</p>
       </Notice>
     </div>
   );
 }
 
 export function DocumentDetail() {
+  const { t } = useTranslation();
   const { documentId } = useParams();
   const document = documents.find(([id]) => id === documentId);
   return (
     <div className="task-column page-stack">
       <PageHeading
-        title={document?.[1] || "Hindi makita ang dokumento"}
+        title={document?.[1] || t("Hindi makita ang dokumento")}
         backTo="/resident/documents"
-        backLabel="Bumalik sa mga dokumento"
+        backLabel={t("Bumalik sa mga dokumento")}
       />
-      <Notice title="Kumpirmahin muna ang requirements">
+      <Notice title={t("Kumpirmahin muna ang requirements")}>
         <p>
-          Ang eksaktong requirements, eligibility, bayarin at oras ng pagproseso
-          ay placeholder pa.
+          {t(
+            "Makipag-ugnayan sa tanggapan ng barangay para sa mga kinakailangan, kwalipikasyon, bayarin at oras ng pagproseso.",
+          )}{" "}
         </p>
       </Notice>
       <ol className="steps">
         <li>
-          <h2>Ihanda ang impormasyon</h2>
-          <p>Sarili mong detalye at layunin.</p>
+          <h2>{t("Ihanda ang impormasyon")}</h2>
+          <p>{t("Sarili mong detalye at layunin.")}</p>
         </li>
         <li>
-          <h2>Ipakita ang kinakailangang patunay</h2>
-          <p>Eksaktong checklist: [placeholder].</p>
+          <h2>{t("Ipakita ang kinakailangang patunay")}</h2>
+          <p>
+            {t(
+              "Kumpirmahin sa tanggapan ng barangay ang mga dokumentong kailangang dalhin.",
+            )}
+          </p>
         </li>
         <li>
-          <h2>Kunin nang personal</h2>
-          <p>Ipakita ang orihinal na ID sa barangay.</p>
+          <h2>{t("Kunin nang personal")}</h2>
+          <p>{t("Ipakita ang orihinal na ID sa barangay.")}</p>
         </li>
       </ol>
-      <ActionLink to="/resident/help">Magpatulong sa barangay desk</ActionLink>
+      <ActionLink to="/resident/help">
+        {t("Magpatulong sa barangay desk")}
+      </ActionLink>
     </div>
   );
 }
 
 export function EventsPage() {
+  const { t } = useTranslation();
   return (
     <div className="page-stack">
       <PageHeading
-        title="Mga aktibidad"
-        description="Mga sample na aktibidad; hindi opisyal na schedule."
+        title={t("Mga aktibidad")}
+        description={t("Mga programa at aktibidad sa ating barangay.")}
       />
       <div className="link-list">
         <RowLink
-          title="Paglilinis sa komunidad"
-          description="24 Oktubre · 8:00 AM · May puwesto sa sample"
+          title={t("Paglilinis sa komunidad")}
+          description={t("24 Oktubre · 8:00 AM · May bakanteng puwesto")}
           to="/resident/events/cleanup"
         />
         <RowLink
-          title="Fun run sa barangay"
-          description="Puno na ang sample activity"
+          title={t("Fun run sa barangay")}
+          description={t("Puno na ang mga puwesto")}
           to="/resident/events/fun-run"
         />
       </div>
-      <Notice title="Para sa kabataang kalahok">
+      <Notice title={t("Para sa kabataang kalahok")}>
         <p>
-          Supervised activities lamang. Susundin ang age at consent requirements
-          na itatakda ng barangay.
+          {t(
+            "Kumpirmahin sa tagapag-organisa ang itinakdang edad, pahintulot ng magulang at pangangasiwa sa mga kabataang kalahok.",
+          )}{" "}
         </p>
       </Notice>
     </div>
@@ -417,16 +464,21 @@ export function EventsPage() {
 }
 
 export function EventDetail() {
+  const { t } = useTranslation();
   const { eventId } = useParams();
   if (!["cleanup", "fun-run"].includes(eventId)) {
     return (
       <div className="task-column page-stack">
-        <PageHeading title="Hindi makita ang aktibidad" />
+        <PageHeading title={t("Hindi makita ang aktibidad")} />
         <EmptyState
-          title="Maaaring nagbago ang link"
-          action={<ActionLink to="/resident/events">Bumalik sa mga aktibidad</ActionLink>}
+          title={t("Maaaring nagbago ang link")}
+          action={
+            <ActionLink to="/resident/events">
+              {"Bumalik sa mga aktibidad"}{" "}
+            </ActionLink>
+          }
         >
-          <p>Pumili ng aktibidad mula sa listahan para magpatuloy.</p>
+          <p>{t("Pumili ng aktibidad mula sa listahan para magpatuloy.")}</p>
         </EmptyState>
       </div>
     );
@@ -435,113 +487,132 @@ export function EventDetail() {
   return (
     <div className="task-column page-stack">
       <PageHeading
-        title={full ? "Fun run sa barangay" : "Paglilinis sa komunidad"}
+        title={full ? t("Fun run sa barangay") : t("Paglilinis sa komunidad")}
         backTo="/resident/events"
-        backLabel="Bumalik sa mga aktibidad"
+        backLabel={t("Bumalik sa mga aktibidad")}
       />
       <Notice
         title={
           full
-            ? "Wala nang puwestong available"
-            : "Sample activity · Hindi opisyal na anunsyo"
+            ? t("Wala nang puwestong available")
+            : t("Pakikilahok sa aktibidad")
         }
         tone={full ? "warning" : "info"}
       >
         <p>
           {full
-            ? "Tingnan ang ibang aktibidad na may puwesto."
-            : "Hindi pa magagamit ang registration sa halimbawang ito."}
+            ? t("Tingnan ang ibang aktibidad na may puwesto.")
+            : t(
+                "Makipag-ugnayan sa tagapag-organisa para sa pagpaparehistro at iba pang detalye.",
+              )}
         </p>
       </Notice>
       {!full && (
         <dl className="definition-list">
-          <Definition label="Kailan">
-            24 Oktubre 2026 · 8:00–10:00 AM
+          <Definition label={t("Kailan")}>
+            {t("24 Oktubre 2026 · 8:00–10:00 AM")}{" "}
           </Definition>
-          <Definition label="Saan">[Placeholder na tagpuan]</Definition>
-          <Definition label="Mga puwesto">
-            18 sa 30 participant slots · sample
+          <Definition label={t("Saan")}>
+            {t("Kumpirmahin ang lugar sa tagapag-organisa")}
+          </Definition>
+          <Definition label={t("Mga puwesto")}>
+            {t("18 sa 30 puwesto ang nakalaan")}{" "}
           </Definition>
         </dl>
       )}
-      <ActionLink to="/resident/events">Tingnan ang ibang aktibidad</ActionLink>
+      <ActionLink to="/resident/events">
+        {t("Tingnan ang ibang aktibidad")}
+      </ActionLink>
     </div>
   );
 }
 
 export function CommunityPage() {
+  const { t } = useTranslation();
   return (
     <div className="page-stack">
       <PageHeading
-        title="Tulong sa komunidad"
-        description="Mga aprubadong sample request mula sa verified residents."
+        title={t("Tulong sa komunidad")}
+        description={t("Mga aprubadong kahilingan ng mga residente.")}
       />
       <div className="link-list">
         <RowLink
-          title="Tulong sa paglilinis ng bakuran"
-          description="Community Cleanup · 1 puwesto · Sample 25 puntos"
+          title={t("Tulong sa paglilinis ng bakuran")}
+          description={t("Paglilinis · 1 bakanteng puwesto · 25 puntos")}
           to="/resident/requests/cleanup"
         />
       </div>
       <Notice
-        title="May pangangailangan ka rin?"
+        title={t("May pangangailangan ka rin?")}
         action={
-          <ActionLink to="/resident/requests/new">Humingi ng tulong</ActionLink>
+          <ActionLink to="/resident/requests/new">
+            {"Humingi ng tulong"}
+          </ActionLink>
         }
       >
-        <p>Maaaring magsumite ng sariling kahilingan para sa pagsusuri.</p>
+        <p>
+          {t("Maaaring magsumite ng sariling kahilingan para sa pagsusuri.")}
+        </p>
       </Notice>
     </div>
   );
 }
 
 export function MessagesPage() {
+  const { t } = useTranslation();
   return (
     <div className="task-column page-stack">
       <PageHeading
-        title="Mga mensahe"
-        description="Sample na usapan sa isang natapos na gawain."
+        title={t("Mga mensahe")}
+        description={t("Mga usapan tungkol sa iyong mga kahilingan at gawain.")}
       />
-      <h2>Sam · Paglilinis ng bakuran</h2>
+      <h2>{t("Sam · Paglilinis ng bakuran")}</h2>
       <div className="message message--received">
-        <p className="small muted">Sam · 9:10 AM</p>
-        <p>Maaari ba sa Sabado, alas-otso?</p>
+        <p className="small muted">{t("Sam · 9:10 AM")}</p>
+        <p>{t("Maaari ba sa Sabado, alas-otso?")}</p>
       </div>
       <div className="message message--sent">
-        <p className="small muted">Ikaw · 9:12 AM</p>
-        <p>Oo, maghahanda ako ng mga sako.</p>
+        <p className="small muted">{t("Ikaw · 9:12 AM")}</p>
+        <p>{t("Oo, maghahanda ako ng mga sako.")}</p>
       </div>
-      <Notice title="Sarado na ang usapan">
+      <Notice title={t("Sarado na ang usapan")}>
         <p>
-          Mababasa pa ang kasaysayan. Walang bagong mensahe sa halimbawang ito.
+          {t(
+            "Maaari mo pa ring basahin ang mga mensahe. Hindi na maaaring magpadala ng bagong mensahe sa saradong usapan.",
+          )}{" "}
         </p>
       </Notice>
-      <ActionLink to="/resident/help">Gabay tungkol sa mga usapan</ActionLink>
+      <ActionLink to="/resident/help">
+        {t("Gabay tungkol sa mga usapan")}
+      </ActionLink>
     </div>
   );
 }
 
 export function NotificationsPage() {
+  const { t } = useTranslation();
   return (
     <div className="page-stack">
       <PageHeading
-        title="Mga abiso"
-        description="Mga sample update sa iyong mga kahilingan."
+        title={t("Mga abiso")}
+        description={t(
+          "Mga bagong impormasyon tungkol sa iyong mga kahilingan.",
+        )}
       />
       <div className="link-list">
         <RowLink
-          title="May kailangang baguhin"
-          description="Certificate of Residency · Basahin ang paliwanag"
+          title={t("May kailangang baguhin")}
+          description={t("Certificate of Residency · Basahin ang paliwanag")}
           to="/resident/requests/residency"
         />
         <RowLink
-          title="Kumpirmahin ang tulong"
-          description="Tapos na ayon sa boluntaryo"
+          title={t("Kumpirmahin ang tulong")}
+          description={t("Tapos na ayon sa boluntaryo")}
           to="/resident/requests/completion"
         />
         <RowLink
-          title="Maaari nang kunin"
-          description="Barangay Clearance · Ihanda ang ID"
+          title={t("Maaari nang kunin")}
+          description={t("Barangay Clearance · Ihanda ang ID")}
           to="/resident/requests/clearance"
         />
       </div>
@@ -549,82 +620,66 @@ export function NotificationsPage() {
   );
 }
 
-export function AccountPage() {
-  return (
-    <div className="task-column page-stack">
-      <PageHeading
-        title="Iyong account"
-        description="Halimbawang profile para sa pagtingin sa layout."
-      />
-      <dl className="definition-list">
-        <Definition label="Pangalan">Alex Dela Cruz · sample</Definition>
-        <Definition label="Account">Beripikadong resident · sample</Definition>
-        <Definition label="Wika ng halimbawang interface">Filipino</Definition>
-      </dl>
-      <Notice title="Halimbawa lamang ang profile">
-        <p>
-          Hindi ito isang naka-sign in na account. Walang personal na detalye
-          ang binabago rito.
-        </p>
-      </Notice>
-      <ActionLink to="/resident/help">Kailangan ko ng tulong</ActionLink>
-    </div>
-  );
-}
-
 export function HelpPage({ home = "/resident" }) {
+  const { t } = useTranslation();
   return (
     <div className="task-column page-stack">
-      <PageHeading title="Gabay at tulong" backTo={home} />
-      <h2>Puwede kang magpatulong.</h2>
+      <PageHeading title={t("Gabay at tulong")} backTo={home} />
+      <h2>{t("Puwede kang magpatulong.")}</h2>
       <p>
-        Sa barangay desk, maaaring tumulong ang kawani sa pagsagot ng
-        aplikasyon. Hindi kailangang ibigay ang password mo.
+        {t(
+          "Sa barangay desk, maaaring tumulong ang kawani sa pagsagot ng aplikasyon. Hindi kailangang ibigay ang password mo.",
+        )}{" "}
       </p>
       <ol className="steps">
         <li>
-          <h2>Sabihin ang kailangan</h2>
-          <p>Tulong, dokumento o aktibidad.</p>
+          <h2>{t("Sabihin ang kailangan")}</h2>
+          <p>{t("Tulong, dokumento o aktibidad.")}</p>
         </li>
         <li>
-          <h2>Suriin kasama ang kawani</h2>
-          <p>Ikaw pa rin ang aplikante.</p>
+          <h2>{t("Suriin kasama ang kawani")}</h2>
+          <p>{t("Ikaw pa rin ang aplikante.")}</p>
         </li>
         <li>
-          <h2>Ibigay ang pahintulot</h2>
-          <p>Itatala kung sino ang tumulong at nagsumite.</p>
+          <h2>{t("Ibigay ang pahintulot")}</h2>
+          <p>{t("Suriin ang mga detalye bago ipasa ang aplikasyon.")}</p>
         </li>
       </ol>
       <dl>
-        <Definition label="Address at oras">
-          [Placeholder · kailangang kumpirmahin]
+        <Definition label={t("Address at oras")}>
+          {t(
+            "Makipag-ugnayan sa tanggapan ng Barangay Caniogan para sa address at oras ng opisina.",
+          )}{" "}
         </Definition>
       </dl>
       <section className="faq">
-        <h2>Mga karaniwang tanong</h2>
+        <h2>{t("Mga karaniwang tanong")}</h2>
         <details>
-          <summary>Paano kinukuha ang dokumento?</summary>
+          <summary>{t("Paano kinukuha ang dokumento?")}</summary>
           <p>
-            Personal ang pagkuha ng aplikante. Dalhin ang orihinal na ID at
-            application reference kapag handa na ang dokumento.
+            {t(
+              "Personal ang pagkuha ng aplikante. Dalhin ang orihinal na ID at application reference kapag handa na ang dokumento.",
+            )}{" "}
           </p>
         </details>
         <details>
-          <summary>May online payment ba?</summary>
+          <summary>{t("May online payment ba?")}</summary>
           <p>
-            Walang online payment. Kumpirmahin sa barangay ang anumang bayaring
-            maaaring kailanganin.
+            {t(
+              "Walang online payment. Kumpirmahin sa barangay ang anumang bayaring maaaring kailanganin.",
+            )}{" "}
           </p>
         </details>
         <details>
-          <summary>Paano makukuha ang community points?</summary>
+          <summary>{t("Paano makukuha ang community points?")}</summary>
           <p>
-            Kailangang kumpirmahin ng boluntaryo at requester ang gawain.
-            Susuriin muna ito ng kawani bago i-finalize ang puntos.
+            {t(
+              "Kailangang kumpirmahin ng boluntaryo at humiling na tapos na ang gawain. Susuriin ito ng kawani bago idagdag ang puntos.",
+            )}{" "}
           </p>
         </details>
       </section>
-      <Link to={home}>Bumalik sa Tahanan</Link>
+      <Link to={home}>{t("Bumalik sa Home")}</Link>
     </div>
   );
 }

@@ -25,7 +25,9 @@ lerna-debug.log*
 coverage/
 .nyc_output/
 playwright-report/
+blob-report/
 test-results/
+playwright/.auth/
 tmp/
 temp/
 *.tmp
@@ -33,9 +35,18 @@ temp/
 *.tsbuildinfo
 .runtimeconfig.json
 
+# Local tests and test-runner configuration
+tests/
+test/
+__tests__/
+*.test.*
+*.spec.*
+playwright.config.*
+
 # Local AI instructions, sessions and project-memory tooling
 AGENTS.md
 CONTEXT.md
+DESIGN.md
 CLAUDE.md
 GEMINI.md
 .project-memory.json

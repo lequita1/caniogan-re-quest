@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import {
   ActionLink,
@@ -7,28 +8,44 @@ import {
   RowLink,
 } from "../../components/ui";
 import { queues } from "./sampleData";
+import { useAuth } from "../auth/authContext";
 
 export function StaffHome() {
+  const { t } = useTranslation();
+  const { account } = useAuth();
   return (
     <div className="page-stack">
       <PageHeading
-        title="Mga kailangang asikasuhin"
-        description="Operational Admin · Mga sample queue para sa sakop mong tungkulin"
+        title={t("Mga susuriin")}
+        description={t(
+          "Pamahalaan ang mga aplikasyon, kahilingan at ulat ng mga residente.",
+        )}
       />
       <div className="link-list">
-        {queues.map((queue) => (
-          <RowLink
-            key={queue.id}
-            title={queue.title}
-            description={queue.description}
-            to={`/staff/${queue.id}`}
-          />
-        ))}
+        {queues
+          .filter(
+            (queue) =>
+              queue.id !== "verification" ||
+              account?.capabilities?.reviewResidents === true,
+          )
+          .map((queue) => (
+            <RowLink
+              key={queue.id}
+              title={t(queue.title)}
+              description={
+                queue.id === "verification"
+                  ? t("Buksan ang mga aplikasyon para sa pagsusuri")
+                  : t(queue.description)
+              }
+              to={`/staff/${queue.id}`}
+            />
+          ))}
       </div>
-      <Notice title="Saklaw ng access">
+      <Notice title={t("Paalala sa pagsusuri")}>
         <p>
-          Suriin lamang ang nakatalagang gawain. Walang self-approval; limitado
-          ang pagtingin sa sensitibong detalye.
+          {t(
+            "Suriin lamang ang mga aplikasyong sakop ng iyong tungkulin. Ipa-review sa ibang awtorisadong kawani ang sarili mong aplikasyon.",
+          )}
         </p>
       </Notice>
     </div>
@@ -36,71 +53,71 @@ export function StaffHome() {
 }
 
 export function StaffQueue() {
+  const { t } = useTranslation();
   const { queueId } = useParams();
   const queue = queues.find((item) => item.id === queueId);
   return (
     <div className="task-column page-stack">
       <PageHeading
-        title={queue?.title || "Hindi makita ang queue"}
-        description={queue?.detail}
+        title={t(queue?.title || "Hindi makita ang listahan")}
+        description={queue?.detail ? t(queue.detail) : undefined}
         backTo="/staff"
-        backLabel="Bumalik sa mga queue"
+        backLabel={t("Bumalik sa mga susuriin")}
       />
-      <Notice title="Halimbawang queue">
-        <p>
-          {queue?.description || "Piliin muli ang queue mula sa listahan."}{" "}
-          Walang totoong aplikasyon o pribadong record na binubuksan sa pahinang
-          ito.
-        </p>
+      <Notice title={t("Status ng mga tala")}>
+        <p>{t(queue?.description || "Pumili ng listahan upang magpatuloy.")}</p>
       </Notice>
       {queueId === "points" && (
         <dl className="definition-list">
-          <Definition label="Assignment">ASG-DEMO-004 · Sam</Definition>
-          <Definition label="Boluntaryo">
-            May completion confirmation
+          <Definition label={t("Gawain")}>{t("ASG-2026-004 · Sam")}</Definition>
+          <Definition label={t("Boluntaryo")}>
+            {t("Kinumpirma nang tapos na ang gawain")}
           </Definition>
-          <Definition label="Requester">May acceptance confirmation</Definition>
-          <Definition label="Naka-lock na tier">25 puntos · sample</Definition>
+          <Definition label={t("Humiling")}>
+            {t("Kinumpirma ang natapos na gawain")}
+          </Definition>
+          <Definition label={t("Puntos")}>{t("25 puntos")}</Definition>
         </dl>
       )}
       <p className="muted">
-        Hindi pa magagamit ang pag-apruba o pagproseso sa halimbawang ito.
+        {t("Hindi pa available ang pagproseso sa pahinang ito.")}
       </p>
-      <ActionLink to="/staff">Tingnan ang ibang queue</ActionLink>
+      <ActionLink to="/staff">{t("Bumalik sa mga susuriin")}</ActionLink>
     </div>
   );
 }
 
 export function CaptainHome() {
+  const { t } = useTranslation();
   return (
     <div className="page-stack">
       <PageHeading
-        title="Pangkalahatang ulat"
-        description="Captain · Read-only overview · Sample records"
+        title={t("Pangkalahatang ulat")}
+        description={t(
+          "Buod ng mga serbisyo, kahilingan at gawain sa barangay.",
+        )}
       />
       <section className="page-stack">
-        <h2>Kalagayan ng serbisyo</h2>
+        <h2>{t("Status ng mga serbisyo")}</h2>
         <dl className="definition-list">
-          <Definition label="Mga kahilingang bukas">12 · sample</Definition>
-          <Definition label="Nakumpletong community tasks">
-            18 · sample
-          </Definition>
-          <Definition label="Dokumentong ready for pickup">
-            6 · sample
-          </Definition>
+          <Definition label={t("Bukas na kahilingan")}>12</Definition>
+          <Definition label={t("Natapos na gawain")}>18</Definition>
+          <Definition label={t("Dokumentong maaari nang kunin")}>6</Definition>
         </dl>
       </section>
       <section className="page-stack">
-        <h2>Mga dapat pagtuunan</h2>
+        <h2>{t("Mga dapat pagtuunan")}</h2>
         <p>
-          Cleanup ang pinakamaraming sample request. May 3 overdue tasks na
-          kailangang tingnan ng operational team.
+          {t(
+            "Paglilinis ang pinakamaraming kahilingan. May 3 gawaing lumampas sa nakatakdang petsa na kailangang suriin ng kawani.",
+          )}
         </p>
       </section>
-      <Notice title="Aggregate lamang">
+      <Notice title={t("Tungkol sa ulat")}>
         <p>
-          Walang ID documents o pribadong usapan sa dashboard na ito. Hindi
-          predictive analytics ang sample summary.
+          {t(
+            "Buod lamang ang ipinapakita rito. Hindi kasama ang mga ID, pribadong address o personal na usapan ng mga residente.",
+          )}
         </p>
       </Notice>
     </div>

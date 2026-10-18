@@ -1,0 +1,73 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "accounts": {
+      ".indexOn": ["verification/status"],
+      ".read": "auth != null && auth.token.email_verified === true && root.child('accounts').child(auth.uid).child('role').val() === 'staff' && root.child('accounts').child(auth.uid).child('standing').val() === 'active' && root.child('accounts').child(auth.uid).child('capabilities/reviewResidents').val() === true && query.orderByChild === 'verification/status' && query.equalTo === 'submitted' && query.limitToFirst != null && query.limitToFirst <= 50",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth.token.email_verified === true && root.child('accounts').child(auth.uid).child('role').val() === 'staff' && root.child('accounts').child(auth.uid).child('standing').val() === 'active' && root.child('accounts').child(auth.uid).child('capabilities/reviewResidents').val() === true))",
+        ".write": "auth != null && newData.exists() && ((auth.uid === $uid && (!data.exists() || data.child('standing').val() === 'active')) || (auth.uid !== $uid && data.exists() && auth.token.email_verified === true && root.child('accounts').child(auth.uid).child('role').val() === 'staff' && root.child('accounts').child(auth.uid).child('standing').val() === 'active' && root.child('accounts').child(auth.uid).child('capabilities/reviewResidents').val() === true))",
+        ".validate": "newData.hasChildren(['role', 'standing', 'profile']) && (!data.child('verification').exists() || newData.child('verification').exists()) && newData.child('capabilities/reviewResidents').val() === data.child('capabilities/reviewResidents').val()",
+        "role": {
+          ".validate": "newData.isString() && ((!data.exists() && auth.uid === $uid && newData.val() === 'resident') || (data.exists() && newData.val() === data.val()))"
+        },
+        "standing": {
+          ".validate": "(!data.exists() && auth.uid === $uid && newData.val() === 'active') || (data.exists() && newData.val() === data.val())"
+        },
+        "profile": {
+          ".validate": "newData.hasChildren(['displayName', 'createdAt'])",
+          "displayName": {
+            ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 80 && (auth.uid === $uid || newData.val() === data.val())"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber() && ((!data.exists() && auth.uid === $uid && newData.val() === now) || newData.val() === data.val())"
+          },
+          "$other": { ".validate": false }
+        },
+        "capabilities": {
+          "reviewResidents": { ".validate": "newData.val() === data.val()" },
+          "$other": { ".validate": false }
+        },
+        "verification": {
+          ".validate": "newData.hasChildren(['fullName', 'address', 'method', 'status', 'submittedAt', 'consent']) && (!data.child('review').exists() || newData.child('review').exists()) && ((newData.child('status').val() === 'submitted') || newData.hasChild('review'))",
+          "fullName": {
+            ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 120 && (newData.val() === data.val() || (auth.uid === $uid && auth.token.email_verified === true && newData.parent().child('status').val() === 'submitted' && (!data.parent().exists() || data.parent().child('status').val() === 'needsChanges')))"
+          },
+          "address": {
+            ".validate": "newData.isString() && newData.val().length >= 10 && newData.val().length <= 300 && (newData.val() === data.val() || (auth.uid === $uid && auth.token.email_verified === true && newData.parent().child('status').val() === 'submitted' && (!data.parent().exists() || data.parent().child('status').val() === 'needsChanges')))"
+          },
+          "method": { ".validate": "newData.val() === 'inPerson'" },
+          "consent": { ".validate": "newData.val() === true" },
+          "status": {
+            ".validate": "(auth.uid === $uid && (newData.val() === data.val() || (auth.token.email_verified === true && newData.val() === 'submitted' && (!data.exists() || data.val() === 'needsChanges')))) || (auth.uid !== $uid && data.val() === 'submitted' && (newData.val() === 'approved' || newData.val() === 'needsChanges' || newData.val() === 'rejected'))"
+          },
+          "submittedAt": {
+            ".validate": "newData.isNumber() && (newData.val() === data.val() || (auth.uid === $uid && auth.token.email_verified === true && newData.val() === now && (!data.parent().exists() || data.parent().child('status').val() === 'needsChanges')))"
+          },
+          "review": {
+            ".validate": "newData.hasChildren(['decision', 'reason', 'reviewerUid', 'reviewedAt', 'evidenceChecked']) && ((auth.uid === $uid && data.exists()) || (auth.uid !== $uid && data.parent().child('status').val() === 'submitted' && newData.child('decision').val() === newData.parent().child('status').val() && newData.child('reviewerUid').val() === auth.uid && newData.child('reviewedAt').val() === now && (newData.child('decision').val() !== 'approved' || newData.child('evidenceChecked').val() === true)))",
+            "decision": {
+              ".validate": "auth.uid !== $uid || newData.val() === data.val()"
+            },
+            "reason": {
+              ".validate": "newData.isString() && newData.val().length >= 10 && newData.val().length <= 500 && (auth.uid !== $uid || newData.val() === data.val())"
+            },
+            "reviewerUid": {
+              ".validate": "auth.uid !== $uid || newData.val() === data.val()"
+            },
+            "reviewedAt": {
+              ".validate": "newData.isNumber() && (auth.uid !== $uid || newData.val() === data.val())"
+            },
+            "evidenceChecked": {
+              ".validate": "newData.isBoolean() && (auth.uid !== $uid || newData.val() === data.val())"
+            },
+            "$other": { ".validate": false }
+          },
+          "$other": { ".validate": false }
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

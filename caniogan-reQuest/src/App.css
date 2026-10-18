@@ -25,6 +25,7 @@
 }
 .site-header {
   background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
 }
 .header-row {
   padding: 16px 32px;

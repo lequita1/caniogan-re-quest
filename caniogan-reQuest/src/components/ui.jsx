@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useId } from "react";
 import { Link } from "react-router";
 
@@ -10,6 +11,7 @@ export function Button({
   type = "button",
   ...props
 }) {
+  const { t } = useTranslation();
   return (
     <button
       type={type}
@@ -18,7 +20,7 @@ export function Button({
       aria-busy={loading || undefined}
       {...props}
     >
-      {loading ? "Sandali lang…" : children}
+      {loading ? t("Naglo-load…") : children}
     </button>
   );
 }
@@ -58,6 +60,7 @@ export function TextField({
   id: givenId,
   ...props
 }) {
+  const { t } = useTranslation();
   const generatedId = useId();
   const id = givenId || generatedId;
   const descriptions = [hint && `${id}-hint`, error && `${id}-error`]
@@ -81,7 +84,7 @@ export function TextField({
       />
       {error && (
         <p className="field__error" id={`${id}-error`}>
-          {error}
+          {t(error)}
         </p>
       )}
     </div>
@@ -116,13 +119,14 @@ export function PageHeading({
   title,
   description,
   backTo,
-  backLabel = "Bumalik sa Tahanan",
+  backLabel = "Bumalik sa Home",
 }) {
+  const { t } = useTranslation();
   return (
     <div className="page-heading">
       {backTo && (
         <ActionLink to={backTo} className="back-link">
-          {backLabel}
+          {t(backLabel)}
         </ActionLink>
       )}
       <h1 tabIndex="-1" id="page-title">

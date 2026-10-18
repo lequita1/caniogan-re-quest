@@ -1,16 +1,64 @@
-# React + Vite
+# Caniogan Re:Quest
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Responsive React web app for community requests and barangay services in Caniogan, Malolos, Bulacan. Uses native CSS, React Router, Firebase Authentication and Realtime Database. Current business-service screens still display sample records.
 
-Currently, two official plugins are available:
+## Local setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install Node.js 22.12+ or 24+ and run `npm ci`.
+2. Copy `.env.example` to `.env.local` and fill in the Firebase Web app configuration. Do not commit `.env.local`.
+3. Run `npm run dev`. Use `npm run lint` and `npm run build` before requesting review.
 
-## React Compiler
+## Authentication and residency
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Implemented: email/password signup and sign-in, email verification and refresh, reset emails using Firebase's hosted action handler, session-only sign-in by default, optional remembered sign-in, logout, account-creation recovery, residency submission/correction and scoped staff review. Protected routes require an active account, confirmed email and the appropriate role. Residents also need approved residency.
 
-## Expanding the ESLint configuration
+### Configure the real Firebase project before using live accounts
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. In Authentication → Sign-in method, enable **Email/Password**. Add your development/deployed host under Authentication → Settings → Authorized domains if required.
+2. Review `database.rules.json`. In Realtime Database → Rules, publish those rules to the intended database. They allow only this phase's account/verification paths and deny all other paths. Do not overwrite an existing project's unrelated rules without integrating them first. Local code changes do **not** publish rules automatically.
+3. Test with an email you control and fictional residency details. Firebase emails open its hosted confirmation/reset page; return to the app and choose **Nakumpirma ko na** after email verification.
+4. Create the first reviewer's account normally and confirm its email. As the Firebase project owner, find its UID in Authentication → Users. In Realtime Database, change `accounts/{uid}/role` to `staff` and add `accounts/{uid}/capabilities/reviewResidents: true`. Preserve its profile and `standing: active`. Staff cannot grant this permission in the browser. Sign in again to check staff access.
+5. A Captain is provisioned separately with `role: captain`, `standing: active`, and a confirmed email. Do not give the Captain `reviewResidents`.
+
+Only an explicitly enabled staff reviewer can open the residency queue. The reviewer cannot approve their own case, change the applicant's submitted details, assign roles or change account standing. Approval requires a recorded in-person evidence check and reason. Returned cases can be corrected and submitted again; rejected cases require help from staff. This phase stores the current submission and latest review, not an immutable review history.
+
+### Demo privacy
+
+Use fictional names and addresses. No ID number or image upload is implemented. Private Cloudinary access, official privacy/retention policy and real-world evidence procedures must be established before collecting real resident data. Other services remain sample views and their database paths are denied.
+
+## Isolated emulator testing
+
+Install Java 21+ for the Database emulator. Run `npm run emulators`; it uses the isolated `demo-caniogan-request` project and never deploys to the real project.
+
+For an emulator-only app preview, use a separate local environment file or process variables:
+
+```dotenv
+VITE_USE_FIREBASE_EMULATORS=true
+VITE_FIREBASE_PROJECT_ID=demo-caniogan-request
+VITE_FIREBASE_API_KEY=demo-key
+VITE_FIREBASE_DATABASE_URL=https://demo-caniogan-request.firebaseio.com
+```
+
+Restart Vite after changing environment values. Emulator accounts/data are disposable and must not contain real credentials. Emulator connection code is enabled only during Vite development; production builds always use the configured real project.
+
+Emulator emails are not delivered to an inbox. Use the confirmation/reset link printed in the emulator terminal. Real Firebase accounts use actual email delivery instead.
+
+Run `npm run test:rules` with emulators stopped, or `npm run test:rules:running` when the Database emulator is already running. The test suite explicitly targets the demo namespace and covers bootstrap, private access, privileged fields, reviewer capability, submission/review transitions, timestamps and suspended accounts.
+
+With the Auth and Database emulators running and Google Chrome installed, use `npm run test:e2e` for browser tests. Playwright starts its own Vite preview on port5180 with explicitly isolated Firebase configuration; it never falls back to the real project. Use `npm run test:e2e:isolated` to start fresh emulators automatically when their ports are free. Do not run the rules tests concurrently with E2E tests because the rules suite resets its local database.
+
+## Interface language and design
+
+Filipino is the default, with authored English selected from the header. Language choice is saved on the device and switching language preserves form input. Maintain English messages in `src/locales/en.json`, use complete sentences with interpolation, and leave personal input and official document names unchanged. Run `npm run test:copy` to check message coverage and interpolation variables.
+
+Keep visible wording concise and familiar. Project/prototype/sample notices are excluded from the interface, while unavailable actions remain disabled with accurate explanations. Fixture data remains in source until each service is integrated. Native CSS, accessible tab navigation and brief reduced-motion-aware feedback implement the civic design direction. Figma is a reference, not a restriction.
+
+## Team workflow
+
+Use your chosen task branch and a reviewed pull request into `main`. Commit application source, configuration, Firebase rules and lockfile. Tests, test-runner configuration, reports, `docs/`, outputs, dependencies, build files, actual environment values and local AI/memory files remain ignored. Test commands above require the local test files; those files are intentionally not included in a fresh clone. App development and production builds do not require them.
+
+Architecture entry points: `src/app/AppRoutes.jsx`, `src/features/auth/`, `src/features/verification/`, `src/lib/firebase.js`, and `database.rules.json`.
+
+## Known follow-up
+
+The current Firebase dependency has four production audit findings through its pinned Firestore/gRPC dependency. A compatible update did not resolve them; do not force a Firebase downgrade. Review upstream remediation before production deployment. Emulator/CLI dependencies are development-only. Full accessibility/user testing, private media and an immutable verification review history remain future work.
