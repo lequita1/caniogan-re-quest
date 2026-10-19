@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "../components/LanguageSwitcher";
 const residentLinks = [
   ["Home", "/resident"],
   ["Mga kahilingan", "/resident/requests"],
+  ["Mga sinalihan ko", "/resident/volunteering"],
   ["Komunidad", "/resident/community"],
   ["Dokumento", "/resident/documents"],
   ["Mga aktibidad", "/resident/events"],

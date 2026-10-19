@@ -88,7 +88,8 @@ const SAFE_ID = /^[A-Za-z0-9_-]{1,128}$/;
 const IMAGE_ID = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 async function recordAt(path, token, fetcher, optional = false) {
   const response = await upstream(fetcher, `${DATABASE}/${path}.json?auth=${encodeURIComponent(token)}`);
-  if (optional && response.status === 403) return null;
+  // RTDB REST uses 401 for rule denials too; a separate board read still authorizes fallback.
+  if (optional && [401, 403].includes(response.status)) return null;
   if (!response.ok) throw new HttpError(response.status >= 500 ? 502 : 403, 'request_access_failed');
   return response.json();
 }
@@ -163,6 +164,17 @@ async function imageFile(request) {
   return { file, requestId: form.get('requestId'), imageId: form.get('imageId') };
 }
 
+async function cloudinaryFailure(response, operation, payload) {
+  const data = payload ?? await response.json().catch(() => null);
+  const message = typeof data?.error?.message === 'string' ? data.error.message : '';
+  // Provider messages can contain signatures and private paths; log fixed categories only.
+  const reason = /invalid api[_ ]key/i.test(message) ? 'invalid_api_key'
+    : /invalid signature/i.test(message) ? 'invalid_signature'
+    : /stale request/i.test(message) ? 'stale_request' : 'unclassified';
+  console.error({ code: 'cloudinary_request_failed', operation, status: response.status, reason });
+  throw new HttpError(502, `image_${operation}_failed`);
+}
+
 async function upload(file, uid, requestId, imageId, env, fetcher) {
   const parameters = {
     allowed_formats: 'jpg,png,webp',
@@ -177,7 +189,7 @@ async function upload(file, uid, requestId, imageId, env, fetcher) {
   // Discard the original filename, which can contain personal information.
   body.set('file', file, 'image');
   const response = await upstream(fetcher, `https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`, { method: 'POST', body });
-  if (!response.ok) throw new HttpError(502, 'image_upload_failed');
+  if (!response.ok) await cloudinaryFailure(response, 'upload');
   const asset = await response.json();
   if (asset.public_id !== parameters.public_id || asset.type !== 'authenticated' ||
       asset.resource_type !== 'image' || !['jpg','png','webp'].includes(asset.format) ||
@@ -217,8 +229,9 @@ async function deleteImage(uid, requestId, imageId, env, fetcher) {
   const body = await signedBody({ public_id: assetPath(uid, requestId, imageId), type: 'authenticated',
     invalidate: 'true', timestamp: String(Math.floor(Date.now() / 1000)) }, env);
   const response = await upstream(fetcher, `https://api.cloudinary.com/v1_1/${CLOUD}/image/destroy`, { method: 'POST', body });
-  if (!response.ok || !['ok', 'not found'].includes((await response.json()).result)) {
-    throw new HttpError(502, 'image_delete_failed');
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !['ok', 'not found'].includes(result?.result)) {
+    await cloudinaryFailure(response, 'delete', result);
   }
   return { deleted: true };
 }
@@ -287,10 +300,16 @@ export default {
         return json(await deleteImage(uid, requestId, imageId, env, fetcher), 200, origin);
       }
       let parent = await recordAt(`requests/${requestId}`, match[1], fetcher, true);
-      if (parent && parent.ownerUid !== uid && !isReviewer(account)) parent = null;
+      if (parent && parent.ownerUid !== uid && !isReviewer(account)) {
+        const assignment = await recordAt(`requestAssignments/${requestId}`, match[1], fetcher, true);
+        if (parent.status !== 'open' || assignment?.ownerUid !== parent.ownerUid ||
+            assignment?.volunteerUid !== uid || assignment?.state !== 'inProgress') parent = null;
+      }
       if (!parent) {
         parent = await recordAt(`requestBoard/${requestId}`, match[1], fetcher);
-        if (parent?.status !== 'open') throw new HttpError(404, 'image_not_found');
+        if (parent?.status !== 'open' || (parent.photoVisibility != null && parent.photoVisibility !== 'community')) {
+          throw new HttpError(404, 'image_not_found');
+        }
       }
       stage = 'cloudinary';
       return await readImage(parent, requestId, imageId, env, fetcher, origin);

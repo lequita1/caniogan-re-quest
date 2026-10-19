@@ -6,13 +6,23 @@ Setup status (2026-10-19): the initial upload-only version was deployed; the req
 
 ## Cloudflare configuration
 
+Photo visibility update: optional private-record reads handle RTDB REST401 and403 denials, then perform a separate authorized board lookup. Private/unknown photo visibility on the board never permits delivery, even if stale image metadata is present. Legacy missing visibility retains community delivery; accepted volunteers still require a current inProgress assignment to access canonical task details. Release with the new database photoVisibility/projection rules. No credentials or public Cloudinary delivery modes are added.
+
+### Diagnosing a Cloudinary rejection
+
+`image_delete_failed` means the authenticated cleanup reached Cloudinary but deletion was not accepted. The Worker now emits `cloudinary_request_failed` with only operation, HTTP status and a fixed reason (`invalid_api_key`, `invalid_signature`, `stale_request`, or `unclassified`). Raw provider messages, API keys, signatures and private asset paths are never logged. This diagnostic is prepared locally; it requires deployment before a live retry produces the new log.
+
+After deploying with `npx wrangler deploy --config workers/media/wrangler.jsonc --keep-vars`, start `npx wrangler tail caniogan-request-media --format pretty`, then retry removal from the resident app. Inspect only the structured diagnostic. An invalid key requires checking the API key for cloud `b2n0ms1f`; an invalid signature requires checking that the secret belongs to that same enabled key and has no extra quotes or spaces, then investigating signing if the pair matches. Enter credentials directly in the Worker settings; never paste the secret into chat. Do not clear the database cleanup reservation to bypass provider failure. Cloudinary's `not found` result already counts as successful idempotent cleanup.
+
+Development origin fix (2026-10-19): the resident app runs at localhost:5173, while the deployed Worker allowed only port5174. Live DELETE preflight confirmed403 for localhost:5173 and204 for127.0.0.1:5174. The prepared configuration now supports both loopback hosts on ports5173 and5174. Run `npx wrangler deploy --config workers/media/wrangler.jsonc --keep-vars` from the app folder to apply it while preserving dashboard variables and secrets. Paths such as /resident/requests/... are not part of an origin. Successful deployment and private media operation still require verification.
+
 Use the Workers Free plan. The existing Worker is named `caniogan-request-media`. Its deployment and configuration are separate from Firebase Hosting.
 
 In the Worker **Settings → Variables and Secrets**, configure:
 
 | Name | Type | Value |
 | --- | --- | --- |
-| `ALLOWED_ORIGINS` | Text | Exact comma-separated app origins; locally `http://127.0.0.1:5174,http://localhost:5174` |
+| `ALLOWED_ORIGINS` | Text | Exact comma-separated app origins; locally `http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174` |
 | `FIREBASE_WEB_API_KEY` | Secret | Firebase project's Web API key, same value as local `VITE_FIREBASE_API_KEY` |
 | `CLOUDINARY_API_KEY` | Secret | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Secret | Cloudinary API secret; never enter in the React environment or share in chat |

@@ -50,6 +50,7 @@ import {
   RequestReviewPage,
   RequestUpdatesPage,
 } from "../features/requests/RequestPages";
+import { VolunteeringPage } from "../features/requests/VolunteeringPage";
 
 function NotFound() {
   const { t } = useTranslation();
@@ -94,6 +95,7 @@ export function AppRoutes() {
               <Route path="resident" element={<AppShell audience="resident" />}>
                 <Route index element={<RequestHome />} />
                 <Route path="requests" element={<MyRequestsPage />} />
+                <Route path="volunteering" element={<VolunteeringPage />} />
                 <Route path="requests/new" element={<NewHelpRequest />} />
                 <Route
                   path="requests/:requestId"

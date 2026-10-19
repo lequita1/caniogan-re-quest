@@ -37,6 +37,8 @@ import {
   uploadRequestImage,
 } from "./mediaService";
 import PrivateImage from "./PrivateImage";
+import { VolunteerPanel } from "./VolunteerPanel";
+import { ClosedVolunteerRequest } from "./VolunteeringPage";
 import { useRequestData } from "./useRequestData";
 import "./requests.css";
 
@@ -44,6 +46,7 @@ const LocationPicker = lazy(() => import("../maps/LocationPicker"));
 const CommunityMap = lazy(() => import("../maps/CommunityMap"));
 const editable = (record) => ["draft", "needsChanges"].includes(record?.status);
 const errorLabels = {
+  photoVisibility: "Sino ang makakakita ng mga larawan?",
   title: "Gumamit ng 5 hanggang 100 character para sa pamagat.",
   description:
     "Ilarawan ang kailangan mong tulong sa 20 hanggang 2,000 character.",
@@ -354,7 +357,9 @@ function Summary({ record, privateDetails = false }) {
         <section className="request-private page-stack">
           <h2>{t("Pribadong detalye ng pagkikita")}</h2>
           <p className="muted">
-            {t("Ikaw at ang awtorisadong tagasuri lamang ang makakakita nito.")}
+            {t(
+              "Makikita ito ng may-ari, awtorisadong tagasuri at napiling boluntaryong tumanggap ng gawain.",
+            )}
           </p>
           {record.meetingDetails ? (
             <p className="request-prose">{record.meetingDetails}</p>
@@ -366,16 +371,37 @@ function Summary({ record, privateDetails = false }) {
           )}
         </section>
       )}
-      {Object.keys(record.images || {}).length > 0 && (
+      {(Object.keys(record.images || {}).length > 0 ||
+        record.hasPrivatePhotos) && (
         <section className="page-stack">
           <h2>{t("Mga larawan")}</h2>
-          <PhotoGallery record={record} />
+          {record.hasPrivatePhotos ? (
+            <Notice title={t("Pribado ang mga larawan")}>
+              <p>
+                {t(
+                  "Makikita lamang ng napiling boluntaryo ang mga larawan matapos niyang tanggapin ang gawain. Pagkatapos tanggapin, buksan ang detalye ng gawain upang makita ang mga ito.",
+                )}
+              </p>
+            </Notice>
+          ) : (
+            <>
+              <p className="muted">
+                {t(
+                  record.photoVisibility === "acceptedVolunteer"
+                    ? "Pribado ang mga larawan sa may-ari at awtorisadong kawani. Makikita rin ito ng napiling boluntaryo matapos niyang tanggapin ang gawain."
+                    : "Makikita ng mga beripikadong residente ang mga larawan kapag naaprubahan ang kahilingan.",
+                )}
+              </p>
+              <PhotoGallery record={record} />
+            </>
+          )}
         </section>
       )}
     </div>
   );
 }
 const emptyInput = {
+  photoVisibility: "acceptedVolunteer",
   title: "",
   category: "cleanup",
   description: "",
@@ -392,7 +418,9 @@ function RequestEditor({ initial = null }) {
     Object.fromEntries(
       Object.keys(emptyInput).map((key) => [
         key,
-        initial?.[key] ?? emptyInput[key],
+        key === "photoVisibility" && initial
+          ? (initial.photoVisibility ?? "community")
+          : (initial?.[key] ?? emptyInput[key]),
       ]),
     ),
   );
@@ -478,7 +506,9 @@ function RequestEditor({ initial = null }) {
       if (!active.current) break;
       const imageId = await beginRequestImageUpload(target);
       try {
-        const uploaded = await uploadRequestImage(target, item.file, { imageId });
+        const uploaded = await uploadRequestImage(target, item.file, {
+          imageId,
+        });
         if (uploaded.imageId !== imageId)
           throw new Error("media_upload_mismatch");
         await addRequestImage(target, imageId, uploaded);
@@ -518,14 +548,15 @@ function RequestEditor({ initial = null }) {
   }
   async function retryCleanup() {
     setBusy(true);
+    setErrors(null);
     try {
       if (cleanup.upload)
         await removeRequestImage(cleanup.requestId, cleanup.imageId);
       await deleteRequestImage(cleanup.requestId, cleanup.imageId);
       await completeRequestImageDeletion(cleanup.requestId, cleanup.imageId);
       if (active.current) setErrors(null);
-    } catch {
-      /* The existing recovery notice stays visible until deletion succeeds. */
+    } catch (error) {
+      if (active.current) setErrors({ form: formError(error) });
     } finally {
       if (active.current) setBusy(false);
     }
@@ -631,7 +662,14 @@ function RequestEditor({ initial = null }) {
           <Notice title={t("Ano ang makikita sa komunidad?")}>
             <p>
               {t(
-                "Kapag naaprubahan, makikita ang pamagat, paglalarawan, lugar, pabuya at mga larawan. Hindi kasama ang pribadong tagubilin o eksaktong pin.",
+                "Kapag naaprubahan, makikita ang pamagat, paglalarawan, lugar at pabuya. Hindi kasama ang pribadong tagubilin o eksaktong pin.",
+              )}
+            </p>
+            <p>
+              {t(
+                values.photoVisibility === "acceptedVolunteer"
+                  ? "Ang mga larawan ay pribado hanggang tanggapin ng napiling boluntaryo ang gawain. Makikita pa rin ito ng may-ari at awtorisadong kawani."
+                  : "Ang mga larawan ay makikita ng mga beripikadong residente kapag naaprubahan ang kahilingan.",
               )}
             </p>
           </Notice>
@@ -745,7 +783,7 @@ function RequestEditor({ initial = null }) {
               maxLength={300}
               error={errors?.meetingDetails}
               hint={t(
-                "Opsyonal. Ikaw at ang awtorisadong tagasuri lamang ang makakakita nito.",
+                "Opsyonal. Makikita ito ng may-ari, awtorisadong kawani at napiling boluntaryong tumanggap ng gawain.",
               )}
             />
             <Button
@@ -778,6 +816,27 @@ function RequestEditor({ initial = null }) {
             disabled={busy || Boolean(cleanup)}
           >
             <legend>{t("Mga larawan (opsyonal)")}</legend>
+            <SelectField
+              label={t("Sino ang makakakita ng mga larawan?")}
+              name="photoVisibility"
+              value={values.photoVisibility}
+              onChange={change}
+              aria-describedby="photo-visibility-help"
+            >
+              <option value="acceptedVolunteer">
+                {t("Kapag tinanggap ang gawain")}
+              </option>
+              <option value="community">
+                {t("Mga beripikadong residente")}
+              </option>
+            </SelectField>
+            <p id="photo-visibility-help" className="muted">
+              {t(
+                values.photoVisibility === "acceptedVolunteer"
+                  ? "Pribado muna ang mga larawan. Makikita ito ng napiling boluntaryo matapos niyang tanggapin ang gawain. Laging may access ang may-ari at awtorisadong kawani."
+                  : "Makikita ng mga beripikadong residente ang mga larawan kapag naaprubahan ang kahilingan. Piliin ito kung makatutulong ang larawan sa pagpapasya kung magboboluntaryo.",
+              )}
+            </p>
             <p className="muted">
               {t(
                 "Hanggang 3 larawan, tig-5 MB. Huwag magsama ng ID, pribadong dokumento o sensitibong detalye.",
@@ -920,6 +979,8 @@ export function HelpRequestDetail({ board = false }) {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(null);
   const record = resource.data;
+  const { user } = useAuth();
+  const owned = record?.ownerUid === user?.uid;
   async function perform() {
     setBusy(true);
     setError(null);
@@ -969,14 +1030,10 @@ export function HelpRequestDetail({ board = false }) {
               </Notice>
             )}
             <Summary record={record} privateDetails={!board} />
-            {board && (
-              <p className="muted">
-                {t(
-                  "Hindi ipinapakita rito ang pribadong detalye ng pagkikita. Ang pagpili ng boluntaryo ay susunod na hakbang sa kahilingan.",
-                )}
-              </p>
+            {(record.status === "open" || record.status === "cancelled") && (
+              <VolunteerPanel record={record} />
             )}
-            {!board && editable(record) && (
+            {!board && owned && editable(record) && (
               <ActionLink
                 variant="primary"
                 to={`/resident/requests/${requestId}/edit`}
@@ -993,7 +1050,7 @@ export function HelpRequestDetail({ board = false }) {
                 <p>{t(error)}</p>
               </Notice>
             )}
-            {!board && confirm && (
+            {!board && owned && confirm && (
               <section
                 className="request-confirm page-stack"
                 aria-label={t("Kumpirmahin ang pagbabago")}
@@ -1030,12 +1087,12 @@ export function HelpRequestDetail({ board = false }) {
                 </div>
               </section>
             )}
-            {!board && !confirm && record.status === "open" && (
+            {!board && owned && !confirm && record.status === "open" && (
               <Button variant="secondary" onClick={() => setConfirm("cancel")}>
                 {t("Kanselahin ang kahilingan")}
               </Button>
             )}
-            {!board && !confirm && record.status === "draft" && (
+            {!board && owned && !confirm && record.status === "draft" && (
               <>
                 <Button
                   variant="secondary"
@@ -1059,6 +1116,8 @@ export function HelpRequestDetail({ board = false }) {
               </>
             )}
           </>
+        ) : board ? (
+          <ClosedVolunteerRequest requestId={requestId} />
         ) : (
           <EmptyState title={t("Hindi makita ang kahilingan")}>
             <p>

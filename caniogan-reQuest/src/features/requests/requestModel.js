@@ -12,6 +12,7 @@ export const REQUEST_STATUSES = {
 
 export function validateRequest(input = {}) {
   const errors = {};
+  if (input.photoVisibility != null && !['community', 'acceptedVolunteer'].includes(input.photoVisibility)) errors.photoVisibility = 'Pumili kung sino ang makakakita ng mga larawan.';
   for (const [key, min, max] of [['title', 5, 100], ['description', 20, 2000], ['areaLabel', 3, 120]]) {
     if (typeof input[key] !== 'string' || input[key].trim().length < min || input[key].trim().length > max) errors[key] = `Gumamit ng ${min} hanggang ${max} na character.`;
   }
@@ -27,9 +28,12 @@ export function validateRequest(input = {}) {
 
 export function toPublicRequest(record, publishedAt) {
   const result = { status: 'open', publishedAt };
-  for (const key of ['ownerUid', 'title', 'category', 'description', 'areaLabel', 'rewardType', 'rewardDetails', 'images']) {
+  for (const key of ['ownerUid', 'title', 'category', 'description', 'areaLabel', 'rewardType', 'rewardDetails', 'photoVisibility']) {
     if (record[key] != null && record[key] !== '') result[key] = record[key];
   }
+  if (record.photoVisibility === 'acceptedVolunteer') {
+    if (Object.keys(record.images || {}).length) result.hasPrivatePhotos = true;
+  } else if (record.images) result.images = record.images;
   if (record.location) result.location = { latE3: Math.round(record.location.lat * 1000), lngE3: Math.round(record.location.lng * 1000) };
   return result;
 }

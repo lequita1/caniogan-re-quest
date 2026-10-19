@@ -26,6 +26,7 @@ function editableInput(input) {
   if (Object.keys(errors).length) throw Object.assign(new Error('requests/invalid-input'), { fields: errors });
   const result = {};
   for (const key of ['title', 'category', 'description', 'areaLabel', 'rewardType']) result[key] = input[key].trim();
+  if (input.photoVisibility != null) result.photoVisibility = input.photoVisibility;
   for (const key of ['meetingDetails', 'rewardDetails']) result[key] = input[key]?.trim() || null;
   result.location = input.location ? { lat: input.location.lat, lng: input.location.lng } : null;
   return result;
@@ -62,7 +63,15 @@ export async function submitRequest(id) {
 export async function cancelRequest(id) {
   const record = await loadRequest(id, true);
   if (record.status !== 'open') throw new Error('requests/not-open');
-  await update(ref(database), { [`requests/${id}/status`]: 'cancelled', [`requests/${id}/updatedAt`]: serverTimestamp(), [`requestBoard/${id}`]: null });
+  const assignment = (await get(ref(database, `requestAssignments/${id}`))).val();
+  const changes = { [`requests/${id}/status`]: 'cancelled', [`requests/${id}/updatedAt`]: serverTimestamp(), [`requestBoard/${id}`]: null };
+  if (assignment && ['offered', 'inProgress'].includes(assignment.state)) Object.assign(changes, {
+    [`requestAssignments/${id}/state`]: 'cancelled', [`requestAssignments/${id}/updatedAt`]: serverTimestamp(),
+    [`requestAssignments/${id}/actorUid`]: currentUid(), [`activeVolunteers/${assignment.volunteerUid}`]: null,
+    [`volunteerApplications/${id}/${assignment.volunteerUid}/status`]: 'cancelled',
+    [`volunteerApplications/${id}/${assignment.volunteerUid}/updatedAt`]: serverTimestamp(),
+  });
+  await update(ref(database), changes);
 }
 
 export async function deleteRequestDraft(id) {
