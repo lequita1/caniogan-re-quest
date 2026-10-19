@@ -7,7 +7,6 @@ import {
   EventDetail,
   EventsPage,
   HelpPage,
-  MessagesPage,
 } from "../features/preview/ResidentPages";
 import {
   CaptainHome,
@@ -50,6 +49,8 @@ import {
   RequestReviewPage,
   RequestUpdatesPage,
 } from "../features/requests/RequestPages";
+import { MessagesPage } from "../features/messages/MessagesPage";
+import { ConversationPage } from "../features/messages/ConversationPage";
 import { VolunteeringPage } from "../features/requests/VolunteeringPage";
 
 function NotFound() {
@@ -118,6 +119,10 @@ export function AppRoutes() {
                 <Route path="events" element={<EventsPage />} />
                 <Route path="events/:eventId" element={<EventDetail />} />
                 <Route path="messages" element={<MessagesPage />} />
+                <Route
+                  path="messages/:requestId/:applicantUid"
+                  element={<ConversationPage />}
+                />
                 <Route path="account" element={<AccountPage />} />
                 <Route path="notifications" element={<RequestUpdatesPage />} />
                 <Route path="help" element={<HelpPage />} />

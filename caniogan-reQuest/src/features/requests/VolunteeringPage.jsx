@@ -10,8 +10,12 @@ import { useVolunteering } from "./useVolunteering";
 import { useRequestData } from "./useRequestData";
 import { APPLICATION_STATUS, ASSIGNMENT_STATUS } from "./volunteerModel";
 
+import { useAuth } from "../auth/authContext";
+import { messageLink } from "../messages/messageModel";
+
 function ActivityItem({ id, record }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const application = useVolunteering("ownApplication", id),
     state = useVolunteering("state", id),
     board = useRequestData("boardItem", id);
@@ -29,7 +33,9 @@ function ActivityItem({ id, record }) {
       ) : (
         <p>
           {t(
-            (!board.data && application.data?.status === "pending" ? "Sarado na ang kahilingan" : APPLICATION_STATUS[application.data?.status]) ||
+            (!board.data && application.data?.status === "pending"
+              ? "Sarado na ang kahilingan"
+              : APPLICATION_STATUS[application.data?.status]) ||
               "Hindi makita ang aplikasyon",
           )}
           {application.data?.status === "selected" && state.data
@@ -37,9 +43,16 @@ function ActivityItem({ id, record }) {
             : ""}
         </p>
       )}
-      <ActionLink to={`/resident/community/${id}`}>
-        {t("Buksan ang kahilingan")}
-      </ActionLink>
+      <div className="request-actions">
+        <ActionLink to={`/resident/community/${id}`}>
+          {t("Buksan ang kahilingan")}
+        </ActionLink>
+        {application.data && (
+          <ActionLink to={messageLink(id, user.uid)}>
+            {t("Magpadala ng mensahe")}
+          </ActionLink>
+        )}
+      </div>
     </li>
   );
 }

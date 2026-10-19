@@ -67,6 +67,12 @@ Keep `database.rules.json`, `firebase.json` and `workers/media/` in Git: they de
 - Only the responsible maintainer deploys media changes: `npx wrangler deploy --config workers/media/wrangler.jsonc --keep-vars`. See [media setup](workers/media/README.md). Credentials remain in Cloudflare variables/secrets.
 - Request photos stay authenticated. Visibility is selected in drafts: verified community residents, or private until the selected volunteer accepts. Exact meeting/location details stay restricted to requester, authorized staff and the accepted volunteer.
 
+## Task messages
+
+Verified residents can open **Message** from a volunteer application or My volunteering. Each requester/applicant pair has its own private text conversation; the inbox appears after the first message. Messages are limited to 2,000 characters, with unread markers, earlier history, and retry after a failed send. Withdrawal, decline, selection of another volunteer, or request closure makes the conversation read-only. Staff roles do not grant access to these conversations.
+
+Publish this branch's complete `database.rules.json` in Firebase Realtime Database before testing messages against the live project. No additional environment values, packages, Cloudflare Worker deployment or Cloudinary setup are required for text messages.
+
 ## Repository contents
 
 Keep source, used assets, package manifests/lockfile, Vite/ESLint configuration, `.env.example`, database rules, Worker source/config and these setup guides. `.env.local`, dependencies, builds, tests, logs, `docs/`, `outputs/`, progress notes and local AI/memory files remain local.

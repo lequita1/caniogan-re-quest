@@ -182,37 +182,6 @@ export function EventDetail() {
   );
 }
 
-export function MessagesPage() {
-  const { t } = useTranslation();
-  return (
-    <div className="task-column page-stack">
-      <PageHeading
-        title={t("Mga mensahe")}
-        description={t("Mga usapan tungkol sa iyong mga kahilingan at gawain.")}
-      />
-      <h2>{t("Sam · Paglilinis ng bakuran")}</h2>
-      <div className="message message--received">
-        <p className="small muted">{t("Sam · 9:10 AM")}</p>
-        <p>{t("Maaari ba sa Sabado, alas-otso?")}</p>
-      </div>
-      <div className="message message--sent">
-        <p className="small muted">{t("Ikaw · 9:12 AM")}</p>
-        <p>{t("Oo, maghahanda ako ng mga sako.")}</p>
-      </div>
-      <Notice title={t("Sarado na ang usapan")}>
-        <p>
-          {t(
-            "Maaari mo pa ring basahin ang mga mensahe. Hindi na maaaring magpadala ng bagong mensahe sa saradong usapan.",
-          )}{" "}
-        </p>
-      </Notice>
-      <ActionLink to="/resident/help">
-        {t("Gabay tungkol sa mga usapan")}
-      </ActionLink>
-    </div>
-  );
-}
-
 export function HelpPage({ home = "/resident" }) {
   const { t } = useTranslation();
   return (

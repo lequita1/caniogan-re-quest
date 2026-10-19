@@ -12,6 +12,8 @@ import {
 import { useVolunteering } from "./useVolunteering";
 import { APPLICATION_STATUS, ASSIGNMENT_STATUS } from "./volunteerModel";
 
+import { messageLink } from "../messages/messageModel";
+
 export function VolunteerPanel({ record }) {
   return <VolunteerCase key={record.id} record={record} />;
 }
@@ -144,7 +146,13 @@ function VolunteerCase({ record }) {
               {owner && selected && <p>{selected.displayName}</p>}
             </Notice>
           )}
-          {owner && assignment.data?.state === "declined" && assignment.data.reason && <Notice title={t("Dahilan ng hindi pagtanggap")}><p className="request-prose">{assignment.data.reason}</p></Notice>}
+          {owner &&
+            assignment.data?.state === "declined" &&
+            assignment.data.reason && (
+              <Notice title={t("Dahilan ng hindi pagtanggap")}>
+                <p className="request-prose">{assignment.data.reason}</p>
+              </Notice>
+            )}
           {!open && (
             <p>
               {t(
@@ -180,6 +188,9 @@ function VolunteerCase({ record }) {
                         <strong>{t("Oras na maaari:")}</strong>{" "}
                         {app.availability}
                       </p>
+                      <ActionLink to={messageLink(record.id, id)}>
+                        {t("Magpadala ng mensahe")}
+                      </ActionLink>
                       {open && app.status === "pending" && (
                         <div className="request-actions">
                           <Button
@@ -229,6 +240,9 @@ function VolunteerCase({ record }) {
               <p className="request-prose">
                 <strong>{t("Oras na maaari:")}</strong> {own.data.availability}
               </p>
+              <ActionLink to={messageLink(record.id, user.uid)}>
+                {t("Magpadala ng mensahe")}
+              </ActionLink>
               {open && own.data.status === "pending" && (
                 <Button
                   variant="secondary"
