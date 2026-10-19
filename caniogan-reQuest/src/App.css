@@ -14,6 +14,9 @@
   border-radius: 8px;
   transform: translateY(-160%);
 }
+.skip-link:not(:focus) {
+  clip-path: inset(50%);
+}
 .skip-link:focus {
   transform: translateY(0);
 }

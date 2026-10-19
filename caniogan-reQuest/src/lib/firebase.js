@@ -34,7 +34,11 @@ if (
   import.meta.env.VITE_USE_FIREBASE_EMULATORS === "true"
 ) {
   if (!globalThis.__requestEmulatorsConnected) {
-    connectAuthEmulator(auth, "http://127.0.0.1:9099");
+    const authEmulatorUrl = import.meta.env.VITE_AUTH_EMULATOR_URL || "http://127.0.0.1:9099";
+    if (!["127.0.0.1", "localhost", "[::1]"].includes(new URL(authEmulatorUrl).hostname)) {
+      throw new Error("Use a local Firebase Auth emulator address.");
+    }
+    connectAuthEmulator(auth, authEmulatorUrl);
     connectDatabaseEmulator(database, "127.0.0.1", 9000);
     globalThis.__requestEmulatorsConnected = true;
   }

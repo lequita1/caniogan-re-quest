@@ -1,0 +1,4 @@
+.private-image-placeholder { display: grid; align-content: center; gap: .75rem; min-height: 8rem; padding: 1rem; color: var(--text-muted, #475569); background: var(--surface-muted, #f1f5f9); border-radius: .75rem; }
+.private-image-placeholder p { margin: 0; }
+.private-image-placeholder button { min-height: 44px; padding: .5rem 1rem; justify-self: start; border: 1px solid currentColor; border-radius: .5rem; color: inherit; background: transparent; cursor: pointer; }
+.private-image-placeholder button:focus-visible { outline: 3px solid var(--primary, #006653); outline-offset: 3px; }

@@ -25,15 +25,15 @@ export function StaffHome() {
         {queues
           .filter(
             (queue) =>
-              queue.id !== "verification" ||
-              account?.capabilities?.reviewResidents === true,
+              (queue.id !== "verification" || account?.capabilities?.reviewResidents === true) &&
+              (queue.id !== "moderation" || account?.capabilities?.reviewRequests === true),
           )
           .map((queue) => (
             <RowLink
               key={queue.id}
               title={t(queue.title)}
               description={
-                queue.id === "verification"
+                ["verification", "moderation"].includes(queue.id)
                   ? t("Buksan ang mga aplikasyon para sa pagsusuri")
                   : t(queue.description)
               }

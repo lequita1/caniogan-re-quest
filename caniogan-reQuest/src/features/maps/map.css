@@ -1,0 +1,116 @@
+.request-map {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.request-map__frame {
+  position: relative;
+  isolation: isolate;
+}
+.request-map__canvas {
+  width: 100%;
+  height: 360px;
+  min-height: 280px;
+  z-index: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: #e8f0f5;
+  font: inherit;
+}
+.request-map__canvas:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+.request-map__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.request-map__attribution {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.request-map__attribution a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.request-map__center {
+  position: absolute;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--color-brand);
+  box-shadow: 0 1px 4px #18324b80;
+  transform: translate(-50%, -50%);
+  z-index: 500;
+}
+.request-map__pin span {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: 2px;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: #124c73;
+  box-shadow: 0 2px 5px #18324b80;
+  transform: rotate(-45deg);
+}
+.request-map .leaflet-control-zoom a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  color: var(--color-brand);
+}
+.request-map .leaflet-popup-content {
+  font: inherit;
+  min-width: 170px;
+  overflow-wrap: anywhere;
+}
+.request-map .leaflet-popup-close-button {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 24px;
+}
+.request-map .leaflet-popup-content p {
+  margin: 8px 0;
+}
+.request-map .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+.request-map__tile-error {
+  position: absolute;
+  inset: auto 8px 8px;
+  z-index: 600;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+.request-map__tile-error button {
+  min-height: 44px;
+  padding: 8px 12px;
+  background: #fff;
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+@media (max-width: 540px) {
+  .request-map__canvas {
+    height: 300px;
+  }
+  .request-map__actions > button {
+    width: 100%;
+  }
+}

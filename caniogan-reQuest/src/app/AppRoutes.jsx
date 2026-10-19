@@ -2,18 +2,12 @@ import { useTranslation } from "react-i18next";
 import { Route, Routes } from "react-router";
 import { AppShell, RouteFocus } from "./AppShell";
 import {
-  CommunityPage,
   DocumentDetail,
   DocumentsPage,
   EventDetail,
   EventsPage,
   HelpPage,
   MessagesPage,
-  NewRequestPage,
-  NotificationsPage,
-  RequestDetail,
-  RequestsPage,
-  ResidentHome,
 } from "../features/preview/ResidentPages";
 import {
   CaptainHome,
@@ -44,6 +38,18 @@ import {
   VerificationQueue,
   VerificationReview,
 } from "../features/verification/VerificationPages";
+
+import {
+  RequestHome,
+  MyRequestsPage,
+  NewHelpRequest,
+  EditHelpRequest,
+  HelpRequestDetail,
+  CommunityBoard,
+  RequestReviewQueue,
+  RequestReviewPage,
+  RequestUpdatesPage,
+} from "../features/requests/RequestPages";
 
 function NotFound() {
   const { t } = useTranslation();
@@ -86,11 +92,22 @@ export function AppRoutes() {
           <Route element={<RequireEmail />}>
             <Route element={<RequireRole role="resident" />}>
               <Route path="resident" element={<AppShell audience="resident" />}>
-                <Route index element={<ResidentHome />} />
-                <Route path="requests" element={<RequestsPage />} />
-                <Route path="requests/new" element={<NewRequestPage />} />
-                <Route path="requests/:requestId" element={<RequestDetail />} />
-                <Route path="community" element={<CommunityPage />} />
+                <Route index element={<RequestHome />} />
+                <Route path="requests" element={<MyRequestsPage />} />
+                <Route path="requests/new" element={<NewHelpRequest />} />
+                <Route
+                  path="requests/:requestId"
+                  element={<HelpRequestDetail />}
+                />
+                <Route
+                  path="requests/:requestId/edit"
+                  element={<EditHelpRequest />}
+                />
+                <Route path="community" element={<CommunityBoard />} />
+                <Route
+                  path="community/:requestId"
+                  element={<HelpRequestDetail board />}
+                />
                 <Route path="documents" element={<DocumentsPage />} />
                 <Route
                   path="documents/:documentId"
@@ -100,7 +117,7 @@ export function AppRoutes() {
                 <Route path="events/:eventId" element={<EventDetail />} />
                 <Route path="messages" element={<MessagesPage />} />
                 <Route path="account" element={<AccountPage />} />
-                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="notifications" element={<RequestUpdatesPage />} />
                 <Route path="help" element={<HelpPage />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
@@ -118,6 +135,17 @@ export function AppRoutes() {
                   <Route
                     path="verification/:uid"
                     element={<VerificationReview />}
+                  />
+                </Route>
+                <Route
+                  element={
+                    <RequireRole role="staff" capability="reviewRequests" />
+                  }
+                >
+                  <Route path="moderation" element={<RequestReviewQueue />} />
+                  <Route
+                    path="moderation/:requestId"
+                    element={<RequestReviewPage />}
                   />
                 </Route>
                 <Route path=":queueId" element={<StaffQueue />} />
