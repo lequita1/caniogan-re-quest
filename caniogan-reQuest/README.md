@@ -1,97 +1,72 @@
 # Caniogan Re:Quest
 
-Responsive React web app for community requests and barangay services in Caniogan, Malolos, Bulacan. Uses native CSS, React Router, Firebase Authentication and Realtime Database. Community help requests now use Firebase records. Document, event, messaging and aggregate screens still use fixture records until their workflows are connected.
+Responsive React/Vite web app using native CSS, React Router, Firebase Authentication/Realtime Database, Leaflet/OpenStreetMap and Cloudinary through a Cloudflare Worker.
 
-## Local setup
+## Run locally
 
-1. Install Node.js 22.12+ or 24+ and run `npm ci`.
-2. Copy `.env.example` to `.env.local` and fill in the Firebase Web app configuration. Do not commit `.env.local`.
-3. Run `npm run dev`. Use `npm run lint` and `npm run build` before requesting review.
+Install Git and Node.js 22.12+ (or Node.js 24). From a new terminal:
 
-## Authentication and residency
-
-Implemented: email/password signup and sign-in, email verification and refresh, reset emails using Firebase's hosted action handler, session-only sign-in by default, optional remembered sign-in, logout, account-creation recovery, residency submission/correction and scoped staff review. Protected routes require an active account, confirmed email and the appropriate role. Residents also need approved residency.
-
-### Configure the real Firebase project before using live accounts
-
-1. In Authentication → Sign-in method, enable **Email/Password**. Add your development/deployed host under Authentication → Settings → Authorized domains if required.
-2. Review `database.rules.json`. In Realtime Database → Rules, publish those rules to the intended database. They allow scoped account, verification, private request and public board paths, and deny all other paths. Do not overwrite an existing project's unrelated rules without integrating them first. Local code changes do **not** publish rules automatically.
-3. Test with an email you control and fictional residency details. Firebase emails open its hosted confirmation/reset page; return to the app and choose **Nakumpirma ko na** after email verification.
-4. Create the first reviewer's account normally and confirm its email. As the Firebase project owner, find its UID in Authentication → Users. In Realtime Database, change `accounts/{uid}/role` to `staff` and add `accounts/{uid}/capabilities/reviewResidents: true`. Preserve its profile and `standing: active`. Staff cannot grant this permission in the browser. Sign in again to check staff access.
-5. A Captain is provisioned separately with `role: captain`, `standing: active`, and a confirmed email. Do not give the Captain `reviewResidents`.
-
-Only an explicitly enabled staff reviewer can open the residency queue. The reviewer cannot approve their own case, change the applicant's submitted details, assign roles or change account standing. Approval requires a recorded in-person evidence check and reason. Returned cases can be corrected and submitted again; rejected cases require help from staff. This phase stores the current submission and latest review, not an immutable review history.
-
-### Resident data
-
-Use fictional names and addresses. ID numbers and identity-document uploads are not collected. Optional request photos use authenticated Cloudinary storage through the separate media Worker. Official privacy/retention policy and real-world evidence procedures must be established before collecting real resident data. Unconnected service paths remain denied.
-
-## Isolated emulator testing
-
-Install Java 21+ for the Database emulator. Run `npm run emulators`; it uses the isolated `demo-caniogan-request` project and never deploys to the real project.
-
-For an emulator-only app preview, use a separate local environment file or process variables:
-
-```dotenv
-VITE_USE_FIREBASE_EMULATORS=true
-VITE_FIREBASE_PROJECT_ID=demo-caniogan-request
-VITE_FIREBASE_API_KEY=demo-key
-VITE_FIREBASE_DATABASE_URL=https://demo-caniogan-request.firebaseio.com
+```powershell
+git clone https://github.com/lequita1/caniogan-re-quest.git
+cd caniogan-re-quest/caniogan-reQuest
+npm ci
+Copy-Item .env.example .env.local
 ```
 
-Restart Vite after changing environment values. Emulator accounts/data are disposable and must not contain real credentials. Emulator connection code is enabled only during Vite development; production builds always use the configured real project.
+In `.env.local`, fill in the Firebase Web API key and app ID using the same project settings as the team. Keep the supplied project/database/media URLs and `VITE_USE_FIREBASE_EMULATORS=false`. Ask Luigi for the Firebase web configuration. Never place Cloudinary API secrets, Firebase admin credentials or Cloudflare tokens here.
 
-Emulator emails are not delivered to an inbox. Use the confirmation/reset link printed in the emulator terminal. Real Firebase accounts use actual email delivery instead.
+```powershell
+npm run dev
+```
 
-Run `npm run test:rules` with emulators stopped, or `npm run test:rules:running` when the Database emulator is already running. The test suite explicitly targets the demo namespace and covers bootstrap, private access, privileged fields, reviewer capability, submission/review transitions, timestamps and suspended accounts.
+Open http://localhost:5174. The port is fixed because the media Worker permits specific origins. If that port is occupied, stop the previous development server. Use the same hostname consistently when signing in. Restart the server after changing environment values.
 
-With the Auth and Database emulators running and Google Chrome installed, use `npm run test:e2e` for browser tests. Playwright starts its own Vite preview on port5180 with explicitly isolated Firebase configuration; it never falls back to the real project. Use `npm run test:e2e:isolated` to start fresh emulators automatically when their ports are free. Do not run the rules tests concurrently with E2E tests because the rules suite resets its local database. The two rule files also share that namespace and the scripts run them with `--test-concurrency=1`.
+Cloning code does not copy accounts or assign staff permissions. Use your own Firebase account; Luigi provisions the required reviewer permissions. Firebase rules and the deployed media Worker remain shared services, so teammates do not need to deploy or create separate projects just to run the frontend.
 
-## Interface language and design
+## Shared commands
 
-Filipino is the default, with authored English selected from the header. Language choice is saved on the device and switching language preserves form input. Maintain English messages in `src/locales/en.json`, use complete sentences with interpolation, and leave personal input and official document names unchanged. Run `npm run test:copy` to check message coverage and interpolation variables.
+| Command | Purpose |
+| --- | --- |
+| `npm ci` | Install the exact lockfile dependencies. |
+| `npm run dev` | Start development on port 5174. |
+| `npm run lint` | Check source code. |
+| `npm run build` | Build the application into ignored `dist/`. |
+| `npm run preview` | Preview the build; use `npm run preview -- --port 5174 --strictPort` for the existing media origin. |
 
-Keep visible wording concise and familiar. Project/prototype/sample notices are excluded from the interface, while unavailable actions remain disabled with accurate explanations. Fixture data remains in source until each service is integrated. Native CSS, accessible tab navigation and brief reduced-motion-aware feedback implement the civic design direction. Figma is a reference, not a restriction.
+Tests, local test tools, planning files and generated outputs are intentionally excluded from Git. They are not needed to run or build the app. Vite/ESLint remain development dependencies, and Wrangler remains for maintaining the media backend.
 
-## Team workflow
+## Team branches
 
-Use your chosen task branch and a reviewed pull request into `main`. Commit application source, configuration, Firebase rules and lockfile. Tests, test-runner configuration, reports, `docs/`, outputs, dependencies, build files, actual environment values and local AI/memory files remain ignored. Test commands above require the local test files; those files are intentionally not included in a fresh clone. App development and production builds do not require them.
+Run Git commands from the repository root or this app folder. Finish or commit current work before switching branches. Choose your own branch name; replace `YOUR-BRANCH-NAME` below.
 
-Architecture entry points: `src/app/AppRoutes.jsx`, `src/features/auth/`, `src/features/verification/`, `src/lib/firebase.js`, and `database.rules.json`.
+```powershell
+git switch main
+git pull --ff-only origin main
+git switch -c YOUR-BRANCH-NAME
+```
 
-## Known follow-up
+Develop and check your work, then publish your branch:
 
-The current Firebase dependency has four production audit findings through its pinned Firestore/gRPC dependency. A compatible update did not resolve them; do not force a Firebase downgrade. Review upstream remediation before production deployment. Emulator/CLI dependencies are development-only. Full accessibility/user testing and immutable review histories remain future work. The private media lifecycle is implemented locally; its updated Worker and database rules require separate rollout. Real Cloudinary credential/preset compatibility has not been exercised by the isolated tests.
+```powershell
+npm run lint
+npm run build
+git add .
+git status
+git commit -m "Describe your change"
+git push -u origin YOUR-BRANCH-NAME
+```
 
+Open a GitHub pull request with **base: main** and **compare: your branch**. Have another member review it before merging. To bring newer main changes into an existing task branch, commit your current work first, then use `git fetch origin` and `git merge origin/main` while on that task branch. Resolve conflicts and rerun lint/build before pushing. Do not force-push main or copy one branch over another.
 
-## Community requests and maps
+## Backend configuration
 
-Residents with approved residency can create and edit a draft, add up to three request photos (JPEG/PNG/WebP, 5 MiB each), review the public/private details and submit for moderation. A staff member with `accounts/{uid}/capabilities/reviewRequests: true` can approve, return with feedback or reject someone else's submission. Grant this capability through the Firebase Console as project owner; `reviewResidents` alone does not grant it. The reviewer account also needs confirmed email, `role: staff` and `standing: active`.
+Keep `database.rules.json`, `firebase.json` and `workers/media/` in Git: they define the app's security and media service. Running the frontend does not publish them.
 
-Approved requests appear in the searchable community board. Owners can cancel an open request; its public entry is removed atomically. Drafts can be deleted after their photos are removed. Volunteer applications and selection are implemented as described below. Two-way completion, messaging and points remain subsequent phases.
+- Luigi publishes database rules in the existing Firebase project's Realtime Database console.
+- Residency reviewers need `role: staff`, `standing: active`, verified email and `capabilities/reviewResidents: true` under `accounts/{uid}`. Request moderation uses the separate `reviewRequests: true` capability. Residents cannot grant themselves these permissions.
+- Only the responsible maintainer deploys media changes: `npx wrangler deploy --config workers/media/wrangler.jsonc --keep-vars`. See [media setup](workers/media/README.md). Credentials remain in Cloudflare variables/secrets.
+- Request photos stay authenticated. Visibility is selected in drafts: verified community residents, or private until the selected volunteer accepts. Exact meeting/location details stay restricted to requester, authorized staff and the accepted volunteer.
 
-### Volunteer applications and selection
+## Repository contents
 
-Every active approved resident with a verified email can apply to someone else's open request with an introduction and availability. The requester chooses one volunteer, who must accept before work begins or decline with a reason. Pending applicants can withdraw; the requester can decline pending applications. Applications cannot be deleted or submitted twice for the same resident/request. The resident's **My volunteering** page shows their latest 50 applications and current assignment; requesters see the latest 50 applicants.
-
-Application text is private to applicant, requester and staff with reviewRequests. Assignment status is readable by verified residents; other assignment details and decline reasons are restricted to requester, selected volunteer and authorized staff. Accepted volunteers can read that task's private details and photos, without permission to edit the request. Exact location remains absent from the public board.
-
-Selection atomically updates `volunteerApplications/{requestId}/{uid}`, `requestAssignments/{requestId}` and `activeVolunteers/{uid}`. Rules enforce one offered/in-progress assignment per resident and one selected volunteer per request, including concurrent selections and cancellation. Offers reserve the volunteer's active slot; accepting starts work. Declining or requester cancellation releases the slot. No automatic expiry or completion is claimed. Requests remain visible on the board while open, with their assigned state shown on the detail page and new applications blocked during an active assignment.
-
-Activation: publish the updated **database.rules.json**, then deploy the updated media Worker with `npx wrangler deploy --config workers/media/wrangler.jsonc --keep-vars`. The frontend uses existing configuration; no new credentials or reviewer capability are required. Existing rules/Worker deployments do not update automatically. Local emulator checks do not prove this new workflow is live.
-
-Maps use Leaflet with OpenStreetMap tiles and attribution, following the [tile usage policy](https://operations.osmfoundation.org/policies/tiles/). Pins are optional; an area or landmark works without a map. Exact coordinates and meeting instructions remain private to the owner and authorized reviewer. The board receives only rounded integer coordinates (thousandths of a degree). Device location is requested only after pressing its button. Keyboard users can pan the map and choose its center. Failed tile loading leaves the text/list controls usable. Do not bulk-fetch, prefetch or offline-cache the standard OpenStreetMap tiles; use a suitable provider if usage grows.
-
-### Activate request photos
-
-Drafts and returned requests have one photo visibility setting for all attached photos: **Verified community residents** or **After the volunteer accepts**. New requests default to the latter. Existing records without a setting retain their earlier community visibility; editing an existing draft preserves that legacy choice until the requester changes it. Visibility is frozen on submission and cannot be silently changed by staff during approval. Private photos remain accessible to the requester/scoped reviewer and the selected volunteer after acceptance; the community projection contains only a private-photo notice, without image IDs or asset metadata. Accepted volunteers open task details to see them. Community visibility still requires verified active residency, never anonymous access.
-
-The Worker optional private lookup now handles Firebase REST401 and403 denials before independently authorizing a board lookup. Previously it handled only403, so ordinary residents could not reach permitted community photos when Firebase returned401. This was reproduced in unit tests and confirmed against local Firebase REST. The fix does not bypass authentication or authorize private photos through the board. Publish updated rules and redeploy the Worker to activate this change; no new credentials are needed.
-
-1. Review and publish the current `database.rules.json` to the intended Realtime Database. Earlier account-only rules cannot save requests.
-2. Update the existing media Worker from `workers/media/worker.js` and add the `MEDIA_LIMITER` binding described in `workers/media/README.md`. Keep existing credentials private and preserve `UPLOAD_LIMITER`. The lifecycle code and extra binding must be released together. The Wrangler configuration contains both binding definitions but does not publish itself.
-3. Set `VITE_MEDIA_API_URL` in `.env.local` to your Worker origin and restart Vite. Add the exact frontend origin to the Worker's `ALLOWED_ORIGINS`; ports are part of an origin. Never put a Cloudinary API secret in any `VITE_` variable.
-
-Uploads first reserve a UUID, then send that exact ID with the file; submission stays blocked until attachment or cleanup finishes. Photo deletion first removes its reference and records a private reservation/tombstone, then destroys the Cloudinary asset and clears the pending reservation. Submission and draft deletion stay blocked while cleanup is pending; reopening the draft offers a retry. Previously removed image IDs cannot be reattached. Staff decisions are bound to the viewed record revision, and the decision form resets when that revision changes.
-
-The isolated browser tests mock photo transport and map tiles while exercising actual Firebase Auth/Database emulators and rules. They do not prove live Cloudinary configuration. With a separate Auth emulator on port9098, set `AUTH_EMULATOR_PORT=9098` before running the local browser suite. The default remains9099. The frontend emulator connection can also use `VITE_AUTH_EMULATOR_URL` (loopback only).
+Keep source, used assets, package manifests/lockfile, Vite/ESLint configuration, `.env.example`, database rules, Worker source/config and these setup guides. `.env.local`, dependencies, builds, tests, logs, `docs/`, `outputs/`, progress notes and local AI/memory files remain local.

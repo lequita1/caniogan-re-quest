@@ -68,6 +68,7 @@ graphify-out/
 # Local documentation and generated planning artifacts
 docs/
 outputs/
+/done.md
 
 # Private server credentials (not Firebase public web configuration)
 *service-account*.json
