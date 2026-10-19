@@ -8,6 +8,10 @@ dist-ssr/
 .env.*
 !.env.example
 *.local
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.wrangler/
 
 # Logs
 logs/
@@ -25,7 +29,9 @@ lerna-debug.log*
 coverage/
 .nyc_output/
 playwright-report/
+blob-report/
 test-results/
+playwright/.auth/
 tmp/
 temp/
 *.tmp
@@ -33,9 +39,18 @@ temp/
 *.tsbuildinfo
 .runtimeconfig.json
 
+# Local tests and test-runner configuration
+tests/
+test/
+__tests__/
+*.test.*
+*.spec.*
+playwright.config.*
+
 # Local AI instructions, sessions and project-memory tooling
 AGENTS.md
 CONTEXT.md
+DESIGN.md
 CLAUDE.md
 GEMINI.md
 .project-memory.json
@@ -53,6 +68,7 @@ graphify-out/
 # Local documentation and generated planning artifacts
 docs/
 outputs/
+/done.md
 
 # Private server credentials (not Firebase public web configuration)
 *service-account*.json

@@ -1,0 +1,222 @@
+.header-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+  min-width: 0;
+}
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--color-divider);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.language-switcher button {
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.language-switcher button[aria-pressed="true"] {
+  background: var(--color-soft);
+  color: var(--color-brand);
+}
+.language-switcher button:hover {
+  color: var(--color-brand);
+  background: var(--color-canvas);
+}
+.desktop-nav {
+  gap: 20px;
+  padding-bottom: 0;
+}
+.desktop-nav .nav-link,
+[data-audience="staff"] .desktop-nav .nav-link,
+[data-audience="captain"] .desktop-nav .nav-link {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 15px 4px;
+  border: 0;
+  border-radius: 0;
+  position: relative;
+  background: transparent;
+  color: var(--color-muted);
+}
+.desktop-nav .nav-link::after {
+  content: "";
+  position: absolute;
+  height: 3px;
+  inset: auto 0 -1px;
+  background: transparent;
+  border-radius: 3px 3px 0 0;
+}
+.desktop-nav .nav-link.active {
+  color: var(--color-brand);
+  background: transparent;
+}
+.desktop-nav .nav-link.active::after {
+  background: var(--color-brand);
+}
+.desktop-nav .nav-link:hover {
+  color: var(--color-brand);
+  background: var(--color-canvas);
+}
+.utility-link,
+.role-label {
+  border: 0;
+  padding: 8px 10px;
+  font-size: 0.875rem;
+  min-height: 44px;
+  min-width: 0;
+  background: transparent;
+}
+.utility-link:first-child,
+.utility-link:last-child:not(:first-child) {
+  min-width: 0;
+  max-width: 180px;
+}
+.role-label {
+  color: var(--color-muted);
+}
+.utility-nav {
+  gap: 8px;
+}
+.row-link {
+  position: relative;
+  padding-right: 40px;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+.row-link::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-top: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+.auth-intro {
+  padding: 64px 0 32px;
+}
+.auth-intro h2 {
+  font-size: clamp(2rem, 3.4vw, 2.75rem);
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+  max-width: 420px;
+}
+.auth-intro > p {
+  max-width: 390px;
+  line-height: 1.7;
+}
+.auth-card {
+  border-color: var(--color-divider);
+}
+.auth-card .page-heading h1 {
+  letter-spacing: -0.02em;
+}
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.auth-main > *,
+.main-content > .page-stack {
+  animation: content-enter 180ms ease-out both;
+}
+@keyframes content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 1100px) {
+  .header-tools {
+    gap: 12px;
+  }
+  .language-switcher button {
+    padding-inline: 10px;
+  }
+  .utility-link,
+  .role-label {
+    padding-inline: 6px;
+  }
+  .header-row {
+    gap: 16px;
+  }
+}
+@media (max-width: 900px) {
+  .header-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-tools {
+    justify-content: space-between;
+  }
+  .app-shell:not(.auth-shell) .header-tools {
+    margin-left: auto;
+  }
+  .language-switcher button {
+    min-height: 44px;
+  }
+  .mobile-nav {
+    gap: 0;
+    padding-bottom: 0;
+  }
+  .mobile-nav .nav-link {
+    border-radius: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-muted);
+    border-bottom: 3px solid transparent;
+  }
+  .mobile-nav .nav-link.active,
+  .mobile-nav .nav-link[aria-expanded="true"] {
+    color: var(--color-brand);
+    border-bottom-color: var(--color-brand);
+    background: var(--color-soft);
+  }
+}
+@media (max-width: 600px) {
+  .auth-shell .header-tools {
+    width: 100%;
+    flex-direction: row-reverse;
+  }
+  .auth-shell .auth-help {
+    padding-left: 0;
+  }
+  .app-shell:not(.auth-shell) .header-tools {
+    margin-left: 0;
+  }
+  .auth-intro {
+    padding: 4px 0 0;
+    gap: 16px;
+  }
+  .auth-intro h2 {
+    font-size: 1.6rem;
+    max-width: 350px;
+  }
+  .auth-intro > p {
+    font-size: 0.9375rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

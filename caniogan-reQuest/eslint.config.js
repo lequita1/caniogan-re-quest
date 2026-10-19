@@ -5,8 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  // Design scripts execute in Figma's tool wrapper; outputs are artifact builders.
-  globalIgnores(['dist', 'docs/wireframes/revision-3/**', 'outputs/**']),
+  globalIgnores(['dist', 'docs/**', 'outputs/**']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
